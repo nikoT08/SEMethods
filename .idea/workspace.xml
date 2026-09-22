@@ -4,34 +4,45 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="227cf82f-2f16-4ee4-bea5-25050025c66c" name="Changes" comment="" />
+    <list default="true" id="227cf82f-2f16-4ee4-bea5-25050025c66c" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/napier/sem/Main.java" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Dockerfile" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="NextEditCompletionFeaturesState">
     <decayedCancelled>
-      <entry key="MS100" value="1.111105388864535" />
-      <entry key="MS500" value="1.6803681291704557" />
-      <entry key="S2" value="2.642160026044126" />
-      <entry key="S5" value="3.9579326746109538" />
-      <entry key="S10" value="5.037341048570589" />
-      <entry key="S30" value="6.203789081717677" />
-      <entry key="S60" value="6.5803158605375645" />
-      <entry key="M2" value="6.7844213419483665" />
-      <entry key="M5" value="6.912345321664823" />
-      <entry key="M10" value="6.955931471759155" />
-      <entry key="M15" value="6.970567084017954" />
-      <entry key="M30" value="6.985256518118738" />
-      <entry key="H1" value="6.992621488926354" />
-      <entry key="H2" value="6.996309050156419" />
-      <entry key="H4" value="6.998154101279615" />
-      <entry key="D1" value="6.999692291333509" />
-      <entry key="W1" value="6.9999560401768735" />
+      <entry key="MS100" value="1.0000000000000016" />
+      <entry key="MS500" value="1.0010835639375661" />
+      <entry key="S2" value="1.1814318945874418" />
+      <entry key="S5" value="1.505225724559767" />
+      <entry key="S10" value="1.7108492600253264" />
+      <entry key="S30" value="1.9752018916946472" />
+      <entry key="S60" value="2.8031890625745284" />
+      <entry key="M2" value="7.324947176691999" />
+      <entry key="M5" value="23.228669788874793" />
+      <entry key="M10" value="36.84806762903506" />
+      <entry key="M15" value="43.23889959699007" />
+      <entry key="M30" value="50.8728406030362" />
+      <entry key="H1" value="55.23224393001446" />
+      <entry key="H2" value="57.5627039908985" />
+      <entry key="H4" value="58.76768847608858" />
+      <entry key="D1" value="59.79269021324045" />
+      <entry key="W1" value="59.9703368309462" />
     </decayedCancelled>
     <decayedSelected>
       <entry key="MS100" value="0.0" />
@@ -53,23 +64,23 @@
       <entry key="W1" value="0.0" />
     </decayedSelected>
     <decayedShown>
-      <entry key="MS100" value="1.0592173595160594" />
-      <entry key="MS500" value="1.6342851238892728" />
-      <entry key="S2" value="2.4566454542911056" />
-      <entry key="S5" value="3.8154538568585297" />
-      <entry key="S10" value="4.9480562244251205" />
-      <entry key="S30" value="6.169051750644575" />
-      <entry key="S60" value="6.562250570083028" />
-      <entry key="M2" value="6.775208251640479" />
-      <entry key="M5" value="6.90861594064215" />
-      <entry key="M10" value="6.954059352478601" />
-      <entry key="M15" value="6.969317348326748" />
-      <entry key="M30" value="6.98463082084927" />
-      <entry key="H1" value="6.992308432684214" />
-      <entry key="H2" value="6.996152470102023" />
-      <entry key="H4" value="6.998075798265148" />
-      <entry key="D1" value="6.999679239026977" />
-      <entry key="W1" value="6.999954175517468" />
+      <entry key="MS100" value="0.8888426811665714" />
+      <entry key="MS500" value="0.9777479529685295" />
+      <entry key="S2" value="1.1736808534585395" />
+      <entry key="S5" value="1.5007749874761447" />
+      <entry key="S10" value="1.7081947100237653" />
+      <entry key="S30" value="1.9739982964569134" />
+      <entry key="S60" value="2.8019607537776743" />
+      <entry key="M2" value="7.3231372639110495" />
+      <entry key="M5" value="23.22630055802859" />
+      <entry key="M10" value="36.84615046806679" />
+      <entry key="M15" value="43.237387863370536" />
+      <entry key="M30" value="50.87194368138294" />
+      <entry key="H1" value="55.231754864228016" />
+      <entry key="H2" value="57.56244855945528" />
+      <entry key="H4" value="58.7675579368598" />
+      <entry key="D1" value="59.79266805589075" />
+      <entry key="W1" value="59.97033365567998" />
     </decayedShown>
   </component>
   <component name="ProjectColorInfo">{
@@ -93,16 +104,40 @@
     "ignore.virus.scanning.warn.message": "true",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/40804950/SEMethods/SEMethods/SEMCode",
+    "last_opened_file_path": "C:/Users/40804950/SEMethods",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "onboarding.tips.debug.path": "C:/Users/40804950/SEMethods/SEMCode/src/main/java/com/napier/sem/Main.java",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "reference.projectsettings.compiler.javacompiler",
     "to.speed.mode.migration.done": "true"
   }
 }]]></component>
+  <component name="RunManager">
+    <configuration name="App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="com.napier.sem.App" />
+      <module name="SEMCode" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="com.napier.sem.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.App" />
+      </list>
+    </recent_temporary>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -124,15 +159,8 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="java-line">
-          <url>file://$PROJECT_DIR$/src/main/java/com/napier/sem/Main.java</url>
-          <line>13</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
