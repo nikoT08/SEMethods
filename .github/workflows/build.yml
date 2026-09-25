@@ -1,23 +1,23 @@
-name: A workflow for my Hello World App
+name: Build project
 on: push
 
 jobs:
   build:
-    name: Hello world action
+    name: Build with Maven and docker
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: action/checkout@v5
+        uses: actions/checkout@v5
       - name: set up JDK 17
         uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
-      - name: Compule with Maven
-        run: mvn compile
-      - name: Builf Docker Image
-        run: docker build -t devopsimage
+      - name: Build Jar with Maven
+        run: mvn clean package
+      - name: Build Docker Image
+        run: docker build -t devopsimage .
       - name: Run image
-        run: docler run --name devopscontainer -d devopsimage
+        run: docker run --name devopscontainer -d devopsimage
       - name: view logs
         run: docker logs -f devopscontainer
