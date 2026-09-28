@@ -1,13 +1,22 @@
 package com.napier.sem;
+
+// Used to read input from the keyboard/console
 import java.util.Scanner;
+
+// Used to create ASCII/text-based figures
 import com.github.lalyos.jfiglet.FigletFont;
+
+// Used when working with input/output operations that may cause errors
 import java.io.IOException;
+
+// Used for adding time delays to the program
 import java.util.concurrent.TimeUnit;
 
 
 
 public class App {
 
+   // Scanner used to read user input from hte console
    static Scanner inputreader = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -15,13 +24,23 @@ public class App {
 
 
 
+       // Display a seperator before the mainsections of the application.
         consoleUiNew();
+
+       // Add a short delay to control the presentation of the interface.
         typewrite(220);
+
+       // Display the population heading using ASCII art.
         asciiPrint("Population");
+
+       // Add a short delay displaying the next section.
         typewrite(220);
 
 
+       // Display the Database heading using ASCII art.
         asciiPrint("DataBase");
+
+       // Display a seperator to improve the readability of the interface
         consoleUiNew();
         displayReportTypes();
         retrunUserInput("Select report type  ");
