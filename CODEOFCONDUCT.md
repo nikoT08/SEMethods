@@ -10,6 +10,6 @@ CODE OF CONDUCT
 - Meetings should discuss:
   What has been done and hasn't been done
   Whats currently being worked on
-- If somoene dosent make a meeting they owe everyone a coffee
+- If someoene dosent make a meeting or is 15 mins late they owe everyone a coffee
 ## Deadlines
 - All deadlines should be made with time.
