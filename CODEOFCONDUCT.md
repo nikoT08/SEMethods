@@ -5,7 +5,7 @@ CODE OF CONDUCT
 ## Communication
 - All team members should communicate clearly to eachother.
 - If a member cannot complate as task on time they should let the team know.
-- - Disagreements/differences should be handled respectfully rather than aggressive of personal.
+- Disagreements/differences should be handled respectfully rather than aggressive of personal.
 ## Scrum meetings
 - Team should meet up once a week to discuss progress.
 - Meetings should discuss:
