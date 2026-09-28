@@ -40,10 +40,16 @@ public class App {
        // Display the Database heading using ASCII art.
         asciiPrint("DataBase");
 
-       // Display a seperator to improve the readability of the interface
+       // Display a seperator to improve the readability of the interface.
         consoleUiNew();
+
+       // Display the available report types to the user.
         displayReportTypes();
+
+       // Ask the user to select the report type they require.
         retrunUserInput("Select report type  ");
+
+       // Display a seperator after the user's selection.
         consoleUiNew();
 
 
