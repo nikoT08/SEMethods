@@ -11,5 +11,5 @@ CODE OF CONDUCT
   What has been done and hasn't been done
   Whats currently being worked on
 - If somoene dosent make a meeting they owe everyone a coffee
-## deadlines
+## Deadlines
 - All deadlines should be made with time.
