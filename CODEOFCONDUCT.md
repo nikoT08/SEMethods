@@ -1,11 +1,15 @@
-CODE OF CONDUCT
-
-- We are all equal
-- we will have a meeting twice a week to discuss what we have done in the week
-- Communication: Keep the group updated and reply to messages within a reasonable time.
-- Deadlines: Complete your assigned work on time
-- If your late or you miss the group meeting you need to send every group member £20
-- Speak and treat each member of the team with respect
-- Spread the work out so one person isnt doing all the work themselves
-- 
-
+CODE OF CONDUCT 
+## Team Principles
+- All team members are treated equally and with respect.
+- Everyone has to contribute equally to the project.
+## Communication
+- All team members should communicate clearly to eachother.
+- If a member cannot complate as task on time they should let the team know
+## Scrum meetings
+- Team should meet up once a week to discuss progress.
+- Meetings should discuss:
+  What has been done and hasn't been done
+  Whats currently being worked on
+- If someoene dosent make a meeting or is 15 mins late they owe everyone a coffee
+## Deadlines
+- All deadlines should be made with time.
