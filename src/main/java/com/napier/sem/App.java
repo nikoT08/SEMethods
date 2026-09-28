@@ -66,6 +66,8 @@ public class App {
 
 
     static void consoleUiNew()
+
+   // Print 101 dash character to create a horizontal seperator.
     { for (int i =0; i<= 100; i++)
     {
         System.out.print("-");
