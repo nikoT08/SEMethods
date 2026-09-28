@@ -1,5 +1,5 @@
 # SEMethods
-#DevOps
+# DevOps
 
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/<nikoT08>/<SEMethods>/<action name taken from build.yml>/<branch>?style=flat-square)
 ![workflow](https://github.com/<nikoT08>/<SEMethods>/actions/workflows/build.yml/badge.svg)
