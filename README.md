@@ -5,4 +5,4 @@
 [![Releases](https://img.shields.io/github/release/<nikoT08>/devops/all.svg?style=flat-square)](https://github.com/<github-username>/devops/releases)
 
 # DevOps
-[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/<nikoT08>/<SEMethods>/<action name taken from build.yml>/<branch>?style=flat-square)]
+[![GitHub Workflow Status (main)](https://img.shields.io/github/workflow/status/<nikoT08>/<SEMethods>/<action name taken from build.yml>/<branch>?style=flat-square)]
