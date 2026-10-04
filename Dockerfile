@@ -1,4 +1,5 @@
 FROM amazoncorretto:17
-COPY ./target/classes/com /tmp/com
-WORKDIR /tmp
-ENTRYPOINT ["java", "com.napier.sem.App"]
+
+COPY ./target/SEMCode-1.0-SNAPSHOT.jar /app/app.jar
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

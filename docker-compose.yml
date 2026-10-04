@@ -7,3 +7,18 @@ services:
       MYSQL_DATABASE: world
     volumes:
       - ./database/world.sql:/docker-entrypoint-initdb.d/world.sql
+    networks:
+      - sem-network
+
+  app:
+    build: .
+    depends_on:
+      - mysql
+    networks:
+      - sem-network
+    stdin_open: true
+    tty: true
+
+networks:
+  sem-network:
+    driver: bridge

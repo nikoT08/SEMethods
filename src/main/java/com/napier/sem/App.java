@@ -4,7 +4,7 @@ package com.napier.sem;
 import java.util.Scanner;
 
 // Used to create ASCII/text-based figures
-import com.github.lalyos.jfiglet.FigletFont;
+
 
 // Used when working with input/output operations that may cause errors
 import java.io.IOException;
@@ -31,26 +31,27 @@ public class App {
         typewrite(220);
 
        // Display the population heading using ASCII art.
-        asciiPrint("Population");
+
 
        // Add a short delay displaying the next section.
         typewrite(220);
 
 
        // Display the Database heading using ASCII art.
-        asciiPrint("DataBase");
 
        // Display a seperator to improve the readability of the interface.
         consoleUiNew();
+
+        Report_base.main(args);
 
        // Display the available report types to the user.
         displayReportTypes();
 
        // Ask the user to select the report type they require.
-        retrunUserInput("Select report type  ");
+       //trunUserInput("Select report type  ");
 
        // Display a seperator after the user's selection.
-        consoleUiNew();
+       //onsoleUiNew();
 
 
 
@@ -83,20 +84,7 @@ public class App {
 
     }
 
-    static void asciiPrint(String txt)
-    {
-        try {
-            // This converts your string into large ASCII art
-            String asciiArt = FigletFont.convertOneLine(txt);
-            System.out.println(asciiArt);
 
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-    }
 
     static void typewrite( int delayMillis) {
 
@@ -109,6 +97,10 @@ public class App {
             }
 
     }
+    static void selectReportType(String input){
+
+
+    }
 
     static void displayReportTypes()
     {
@@ -116,4 +108,6 @@ public class App {
     }
 
 }
+
+
 
