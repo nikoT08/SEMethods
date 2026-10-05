@@ -1,24 +1,13 @@
+version: '3'
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: semysql
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: world
-    volumes:
-      - ./database/world.sql:/docker-entrypoint-initdb.d/world.sql
-    networks:
-      - sem-network
 
+  # Build app from Dockerfile in same folder
   app:
     build: .
-    depends_on:
-      - mysql
-    networks:
-      - sem-network
-    stdin_open: true
-    tty: true
 
-networks:
-  sem-network:
-    driver: bridge
+  # Build the db as name world from the Dockerfile in the db folder
+  # exposing the port if we want to run code outside a container
+  db:
+    build: db/.
+    ports:
+      - "33060:3306"

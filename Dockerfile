@@ -1,5 +1,4 @@
 FROM amazoncorretto:17
-
-COPY ./target/SEMCode-1.0-SNAPSHOT.jar /app/app.jar
-
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+COPY ./target/SEMCode-1.0-SNAPSHOT.jar /tmp
+WORKDIR /tmp
+ENTRYPOINT ["java", "-jar", "SEMCode-1.0-SNAPSHOT.jar"]

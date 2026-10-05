@@ -1,39 +1,22 @@
 package com.napier.sem;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 
 public class Report_base {
 
     public static void main(String[] args) {
 
-        String url = "jdbc:mysql://mysql:3306/world";
-        String username = "root";
-        String password = "root";
-
-        Connection connection = null;
+       Connection connection = null;
 
         // Wait for MySQL to become available
         while (connection == null) {
             try {
-                connection = DriverManager.getConnection(
-                        url,
-                        username,
-                        password
-                );
-
+                Thread.sleep(2000);
+                connection = DriverManager.getConnection("jdbc:mysql://db:3306/world?useSSL=false&allowPublicKeyRetrieval=true", "root", "example");
                 System.out.println("Connected to MySQL.");
 
             } catch (Exception e) {
                 System.out.println("Waiting for MySQL...");
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException interruptedException) {
-                    Thread.currentThread().interrupt();
-                    return;
-                }
             }
         }
 
