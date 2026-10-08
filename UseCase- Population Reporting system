@@ -1,2 +1,13 @@
 Actor- Team member
-Description: The Team member uses the Population Reporting System to view population reports. The system get the data from the database
+
+Description: The Team member uses the Population Reporting System to view population reports. The system get the data from the database  and displays it. Reports are read-only, so nothing is changed.
+
+Scope: A single country is chosen by the Team member
+
+Triger: The Team member opens the Population Reporting System and chooses to view report.
+
+Preconditions: The database is running and contains the country, city and language data.
+The chosen country exists in the database
+
+Reports available (from the diagram)
+1. View countries ranked by population
