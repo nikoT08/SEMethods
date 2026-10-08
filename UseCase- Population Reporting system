@@ -6,8 +6,31 @@ Scope: A single country is chosen by the Team member
 
 Triger: The Team member opens the Population Reporting System and chooses to view report.
 
-Preconditions: The database is running and contains the country, city and language data.
-The chosen country exists in the database
+Preconditions: The database is running and contains the country, city and language data. 
+For reports about a single country, teh chosen country exists in the database.
 
-Reports available (from the diagram)
-1. View countries ranked by population
+Main flow
+1. The Team meber selects on report type from the list:
+  - cities ranked by population
+  - top N countries
+  - cities ranked by population
+  - capital cities ranked by population
+  - urban/rural population breakdown
+  - total population
+  - language statistics
+2. If the report is a "top N" report, the Team member enters a value for N
+3. For reports about a single country (cities, capital city, urban/rural breakdown, total populatio, language statistics), the Team member selects a country. The country ranking reports do not need a country because they compare all countries.
+4. The system checks the inputs are valid
+5. The system querirs the database for that country.
+6. The system displays the report, with results ordered from the bughest to lowest population where is it a ranking 
+
+Alternative flowws
+- 2a. N is zero, negative or not a number: the system shows an error and asks again.
+- 3a. N is zero, negative or mot a number: the system shows an error and asks again.
+- 5a. N is larger than the number of cities in that country: the system shows all of them.
+- 5b. The countey has no data for the chosen report: the system shows a "no data available" message.
+- 5c. The database cannot be reached: the system shows an error message.
+
+Postconditions: The report is displayed. Nothing in the database changed.
+
+Data used: country (country details, total population, capital), city (city populations) and countrylanguage (languages and percentage of speakers).
