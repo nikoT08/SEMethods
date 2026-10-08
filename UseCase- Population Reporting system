@@ -18,9 +18,9 @@ Main flow
   - urban/rural population breakdown
   - total population
   - language statistics
-2. If the report is a "top N" report, the Team member enters a value for N
+2. If the report is a "top N" report, the Team member enters a value for N.
 3. For reports about a single country (cities, capital city, urban/rural breakdown, total populatio, language statistics), the Team member selects a country. The country ranking reports do not need a country because they compare all countries.
-4. The system checks the inputs are valid
+4. The system checks the inputs are valid.
 5. The system querirs the database for that country.
 6. The system displays the report, with results ordered from the bughest to lowest population where is it a ranking 
 
