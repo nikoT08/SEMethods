@@ -19,7 +19,7 @@ public class Report_base {
                 System.out.println("Waiting for MySQL...");
             }
         }
-        
+        //Countries filitered by population descending
         try {
             Statement statement = connection.createStatement();
 
@@ -37,7 +37,7 @@ public class Report_base {
             }
 
             }
-        
+        //Countries in continent and filtered by population descending
         try {
             Statment statment = connection.createStatement();
 
@@ -56,7 +56,7 @@ public class Report_base {
             }
 
             }
-
+        //Countries in a region and filtered by population descending
         try {
             Statment statment = connection.createStatement();
 
@@ -75,7 +75,7 @@ public class Report_base {
             }
             
             }
-
+        //Top 5 countries filitered by population descending
         try {
             Statement statement = connection.createStatement();
 
@@ -94,7 +94,7 @@ public class Report_base {
             }
 
             }
-                    
+        //Top 5 countries in continent and filtered by population descending       
         try {
             Statment statment = connection.createStatement();
 
@@ -114,7 +114,7 @@ public class Report_base {
             }
         
             }
-
+        //Top 5 countries in a region and filtered by population descending
         try {
             Statment statment = connection.createStatement();
 
@@ -135,7 +135,7 @@ public class Report_base {
         
             }
 
-        
+            //Close
             connection.close();
 
         } catch (Exception e) {
