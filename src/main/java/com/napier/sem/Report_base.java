@@ -19,6 +19,62 @@ public class Report_base {
                 System.out.println("Waiting for MySQL...");
             }
         }
+        
+        try {
+            Statement statement = connection.createStatement();
+
+            ResultSet results = statement.executeQuery(
+                    "SELECT Name, Population " +
+                            "FROM country " +
+                            "ORDER BY Population DESC " 
+            );
+
+            while (results.next()) {
+                System.out.println(
+                        results.getString("Name") + ": " +
+                                results.getInt("Population")
+                );
+            }
+
+            }
+        
+        try {
+            Statment statment = connection.createStatement();
+
+            ResultSet results = statement.executeQuery(
+                    "SELECT Name, Population" +
+                            "FROM country" +
+                            "WHERE Continent = 'Europe'" +
+                            "ORDER BY population DESC" 
+            );
+            
+            while (results.next()) {
+                System.out.println(
+                        results.getString("Name") + ": " +
+                                results.getInt("Population")
+                );
+            }
+
+            }
+
+        try {
+            Statment statment = connection.createStatement();
+
+            ResultSet results = statement.executeQuery(
+                    "SELECT Name, Population" +
+                            "FROM country" +
+                            "WHERE Continent = 'Western Europe'" +
+                            "ORDER BY population DESC" +
+            );
+            
+            while (results.next()) {
+                System.out.println(
+                        results.getString("Name") + ": " +
+                                results.getInt("Population")
+                );
+            }
+            
+            }
 
         try {
             Statement statement = connection.createStatement();
@@ -37,6 +93,49 @@ public class Report_base {
                 );
             }
 
+            }
+                    
+        try {
+            Statment statment = connection.createStatement();
+
+            ResultSet results = statement.executeQuery(
+                    "SELECT Name, Population" +
+                            "FROM country" +
+                            "WHERE Continent = 'Europe'" +
+                            "ORDER BY population DESC" +
+                            "LIMIT 5"
+            );
+            
+            while (results.next()) {
+                System.out.println(
+                        results.getString("Name") + ": " +
+                                results.getInt("Population")
+                    );
+            }
+        
+            }
+
+        try {
+            Statment statment = connection.createStatement();
+
+            ResultSet results = statement.executeQuery(
+                    "SELECT Name, Population" +
+                            "FROM country" +
+                            "WHERE Continent = 'Western Europe'" +
+                            "ORDER BY population DESC" +
+                            "LIMIT 5"
+            );
+            
+            while (results.next()) {
+                System.out.println(
+                        results.getString("Name") + ": " +
+                                results.getInt("Population")
+                    );
+            }
+        
+            }
+
+        
             connection.close();
 
         } catch (Exception e) {
