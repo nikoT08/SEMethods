@@ -1,5 +1,4 @@
-FROM mysql/mysql-server:latest
-COPY world.sql /docker-entrypoint-initdb.d
-ENV MYSQL_ROOT_PASSWORD example
-#Mac Fix
-ENV MYSQL_ROOT_HOST=%
+FROM amazoncorretto:17
+COPY ./target/devops.jar /tmp
+WORKDIR /tmp
+ENTRYPOINT ["java", "-jar", "devops.jar", "db:3306", "30000"]
