@@ -1,21 +1,23 @@
-name: Build project
+name: A workflow for my Hello World App
 on: push
 
 jobs:
   build:
-    name: Build with Maven and docker
+    name: Hello world action
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: set up JDK 17
+        with:
+          submodules: recursive
+      - name: Set up JDK 11
         uses: actions/setup-java@v5
         with:
           java-version: '17'
           distribution: 'temurin'
+      - name: Unit Tests
+        run: mvn -Dtest=com.napier.devops.AppTest test
       - name: Package and Run docker compose
         run: |
           mvn package -DskipTests
-          docker compose up --abort-on-container-exit
-      - name: view logs
-        run: docker logs semethods-app-1
+          docker compose up --abort-on-container-exitogs semethods-app-1
