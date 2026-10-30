@@ -15,6 +15,7 @@ public class Report_base {
             try {
                 Thread.sleep(2000);
 
+                // Attempts to connect the MySQL database container
                 connection = DriverManager.getConnection(
                         "jdbc:mysql://db:3306/world?useSSL=false&allowPublicKeyRetrieval=true",
                         "root",
@@ -23,7 +24,7 @@ public class Report_base {
 
                 System.out.println("Connected to MySQL.");
 
-            } catch (Exception e) {
+            } catch (Exception e) { // Catches errors if the database is not ready yet
                 System.out.println("Waiting for MySQL...");
             }
         }
@@ -33,8 +34,8 @@ public class Report_base {
             boolean running = true;
 
             while (running) {
-                System.out.println("\n===== WORLD DATABASE REPORTS =====");
-                System.out.println("1. All countries worldwide");
+                System.out.println("\n===== WORLD DATABASE REPORTS ====="); // Prints menu header title
+                System.out.println("1. All countries worldwide"); // Prints menu option 1
                 System.out.println("2. Countries by continent");
                 System.out.println("3. Countries by region");
                 System.out.println("4. Top N populated countries worldwide");
@@ -45,11 +46,11 @@ public class Report_base {
                 System.out.println("9. Population of the world");
                 System.out.println("10. Population of a country");
                 System.out.println("11. Population of a city");
-                System.out.println("12. Language speaker report");
+                System.out.println("12. Language speaker report"); // prints menu option 12
                 System.out.println("0. Exit");
                 System.out.print("Choose a report: ");
 
-                int choice;
+                int choice; // Declares a vatiable to store the user's numeric choices
 
                 try {
                     choice = Integer.parseInt(scanner.nextLine().trim());
