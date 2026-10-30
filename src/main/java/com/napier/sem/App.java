@@ -1,6 +1,7 @@
 package com.napier.sem;
 
 // Used to read input from the keyboard/console
+import java.util.ArrayList;
 import java.util.Scanner;
 
 // Used to create ASCII/text-based figures
@@ -60,12 +61,6 @@ public class App {
     }
 
 
-
-
-
-
-
-
     static void consoleUiNew()
 
    // Print 101 dash character to create a horizontal seperator.
@@ -106,6 +101,43 @@ public class App {
     {
         System.out.println("Country[1] City[2] Population[3] Custom[4]");
     }
+
+    public void printSalaries(ArrayList<Employee> employees)
+    {
+        // Check employees is not null
+        if (employees == null)
+        {
+            System.out.println("No employees");
+            return;
+        }
+        // Print header
+        System.out.println(String.format("%-10s %-15s %-20s %-8s", "Emp No", "First Name", "Last Name", "Salary"));
+        // Loop over all employees in the list
+        for (Employee emp : employees)
+        {
+            if (emp == null)
+                continue;
+            String emp_string =
+                    String.format("%-10s %-15s %-20s %-8s",
+                            emp.emp_no, emp.first_name, emp.last_name, emp.salary);
+            System.out.println(emp_string);
+        }
+    }
+
+    public void displayEmployee(Employee emp)
+    {
+        if (emp == null)
+        {
+            System.out.println("No employee");
+            return;
+        }
+
+        System.out.println("Employee number: " + emp.emp_no);
+        System.out.println("First name: " + emp.first_name);
+        System.out.println("Last name: " + emp.last_name);
+        System.out.println("Salary: " + emp.salary);
+    }
+
 
 }
 
