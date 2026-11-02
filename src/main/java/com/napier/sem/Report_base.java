@@ -56,29 +56,29 @@ public class Report_base {
                 try {
                     switch (choice) {
 
-                        case 1:
-                            printReport(connection,
+                        case 1: // Choice 1: All countries worldwide
+                            printReport(connection, // Calls helper method to execute query and print results
                                     "SELECT Code, Name, Continent, Region, " +
                                             "Population, Capital " +
                                             "FROM country " +
-                                            "ORDER BY Population DESC",
-                                    new String[]{});
-                            break;
+                                            "ORDER BY Population DESC", // Orders countries by population descending
+                                    new String[]{}); // Passes an empty parameter array
+                            break; // Exits switch block
 
-                        case 2:
-                            System.out.print("Enter continent: ");
-                            String continent = scanner.nextLine();
+                        case 2: // Choice 2: Countries filtered by continent
+                            System.out.print("Enter continent: "); // Prompts user for a continent name
+                            String continent = scanner.nextLine(); // Reads the user's typed continent name
 
-                            printReport(connection,
+                            printReport(connection, // Calls helper method with parameter
                                     "SELECT Code, Name, Continent, Region, " +
                                             "Population, Capital " +
                                             "FROM country " +
                                             "WHERE Continent = ? " +
-                                            "ORDER BY Population DESC",
-                                    new String[]{continent});
-                            break;
+                                            "ORDER BY Population DESC", // Filters by continent placeholder
+                                    new String[]{continent}); // Passes continent as query parameter
+                            break; // Exits switch block
 
-                        case 3:
+                        case 3: // Choice 3: Countries filtered by region
                             System.out.print("Enter region: ");
                             String region = scanner.nextLine();
 
@@ -91,10 +91,10 @@ public class Report_base {
                                     new String[]{region});
                             break;
 
-                        case 4:
+                        case 4: // Choice 4: Top N populated countries worldwide
                             int countryLimit = readLimit(scanner);
 
-                            if (countryLimit > 0) {
+                            if (countryLimit > 0) { // Checks if valid limit was provided
                                 printReport(connection,
                                         "SELECT Code, Name, Continent, Region, " +
                                                 "Population, Capital " +
@@ -104,7 +104,7 @@ public class Report_base {
                             }
                             break;
 
-                        case 5:
+                        case 5: // Choice 5: All cities worldwide
                             printReport(connection,
                                     "SELECT city.Name, country.Name AS Country, " +
                                             "city.District, city.Population " +
@@ -114,7 +114,7 @@ public class Report_base {
                                     new String[]{});
                             break;
 
-                        case 6:
+                        case 6: // Choice 6: Cities filtered by country name
                             System.out.print("Enter country name: ");
                             String country = scanner.nextLine();
 
@@ -122,13 +122,13 @@ public class Report_base {
                                     "SELECT city.Name, country.Name AS Country, " +
                                             "city.District, city.Population " +
                                             "FROM city " +
-                                            "JOIN country ON city.CountryCode = country.Code " +
+                                            "JOIN country ON city.CountryCode = country.Code " + // Joins city and country tables
                                             "WHERE country.Name = ? " +
                                             "ORDER BY city.Population DESC",
                                     new String[]{country});
-                            break;
+                            break; // Exits switch block
 
-                        case 7:
+                        case 7: // Choice 7: Top N populated cities worldwide
                             int cityLimit = readLimit(scanner);
 
                             if (cityLimit > 0) {
