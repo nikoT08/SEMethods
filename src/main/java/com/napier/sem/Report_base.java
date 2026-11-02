@@ -6,28 +6,22 @@ import java.util.Scanner;
 
 public class Report_base {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-        Connection connection = null;
+        //Use localHhost when running from intelliJ
+        String location = "localhost:33060";
+        int delay = 2000;
 
-        // Wait for MySQL to become available
-        while (connection == null) {
-            try {
-                Thread.sleep(2000);
-
-                // Attempts to connect the MySQL database container
-                connection = DriverManager.getConnection(
-                        "jdbc:mysql://db:3306/world?useSSL=false&allowPublicKeyRetrieval=true",
-                        "root",
-                        "example"
-                );
-
-                System.out.println("Connected to MySQL.");
-
-            } catch (Exception e) { // Catches errors if the database is not ready yet
-                System.out.println("Waiting for MySQL...");
-            }
+        // Docker can supply a different database location and delay
+        if (args.length >=1) {
+            location = args[0];
         }
+
+        if (args.length >=2) {
+            delay = Integer.parseInt(args[1]);
+        }
+
+        Connection connection = connect(location, delay);
 
         try (Scanner scanner = new Scanner(System.in)) {
 
@@ -170,10 +164,15 @@ public class Report_base {
                             System.out.print("Enter country name: ");
                             String populationCountry = scanner.nextLine();
 
-                            printReport(connection,
-                                    "SELECT Name, Population " +
-                                            "FROM country WHERE Name = ?",
-                                    new String[]{populationCountry});
+                            long population = getCountryPopulation(
+                                    connection, populationCountry);
+
+                            if (population == -1) {
+                                System.out.println("No results found.");
+                            } else {
+                                System.out.println(populationCountry + ": " + population);
+                            }
+
                             break;
 
                         case 11:
@@ -229,7 +228,7 @@ public class Report_base {
     }
 
     // Read a positive number for top-N reports
-    private static int readLimit(Scanner scanner) {
+    public static int readLimit(Scanner scanner) {
         System.out.print("Enter N: ");
 
         try {
@@ -303,5 +302,51 @@ public class Report_base {
                 }
             }
         }
+    }
+
+    static Connection connect(String location, int delay)
+        throws SQLException, InterruptedException {
+
+        String url = "jdbc:mysql://" + location + "/world?useSSL=false&allowPublicKeyRetrieval=true";
+
+        //Try to 10 times while MySQL starts
+        for (int attempt = 1; attempt <=10; attempt++) {
+            try {
+                Thread.sleep(delay);
+
+                Connection connection = DriverManager.getConnection(url, "root", "example");
+
+                System.out.println("Connected to MySQL.");
+                return connection;
+
+            } catch (SQLException e) {
+                System.out.println("Connection attempt " + attempt + "Failed.");
+
+                if (attempt == 10) {
+                    throw e;
+                }
+
+            }
+        }
+        throw new SQLException("Could not connect to MySQL.");
+    }
+
+    static long getCountryPopulation(
+            Connection connection, String country) throws SQLException {
+
+        String sql = "SELECT Population FROM country WHERE Name = ?";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, country);
+
+            try (ResultSet results = statement.executeQuery()) {
+                if (results.next()) {
+                    return results.getLong("Population");
+                }
+            }
+        }
+
+        // Country not found.
+        return -1;
     }
 }

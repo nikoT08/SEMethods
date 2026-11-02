@@ -1,4 +1,4 @@
-version: '3'
+
 services:
 
   # Build app from Dockerfile in same folder
@@ -12,4 +12,4 @@ services:
   db:
     build: db/.
     ports:
-      - "3306"
+      - "33060:3306"
