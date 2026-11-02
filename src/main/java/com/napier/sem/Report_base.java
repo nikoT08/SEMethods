@@ -131,18 +131,18 @@ public class Report_base {
                         case 7: // Choice 7: Top N populated cities worldwide
                             int cityLimit = readLimit(scanner);
 
-                            if (cityLimit > 0) {
+                            if (cityLimit > 0) { // Checks if valid limit was provided
                                 printReport(connection,
                                         "SELECT city.Name, country.Name AS Country, " +
                                                 "city.District, city.Population " +
                                                 "FROM city " +
                                                 "JOIN country ON city.CountryCode = country.Code " +
-                                                "ORDER BY city.Population DESC LIMIT ?",
-                                        new String[]{String.valueOf(cityLimit)});
+                                                "ORDER BY city.Population DESC LIMIT ?", // Queries top N cities
+                                        new String[]{String.valueOf(cityLimit)}); // Passes limit as query parameter
                             }
                             break;
 
-                        case 8:
+                        case 8: // Choice 8: All capital cities worldwide
                             printReport(connection,
                                     "SELECT capital.Name, country.Name AS Country, " +
                                             "capital.Population " +
@@ -152,37 +152,37 @@ public class Report_base {
                                     new String[]{});
                             break;
 
-                        case 9:
+                        case 9: // Choice 9: Population of the world
                             printReport(connection,
                                     "SELECT 'World' AS Name, " +
                                             "SUM(Population) AS Population " +
-                                            "FROM country",
+                                            "FROM country", // Calculates total population of all countries
                                     new String[]{});
                             break;
 
-                        case 10:
-                            System.out.print("Enter country name: ");
+                        case 10: // Choice 10: Population of a country
+                            System.out.print("Enter country name: "); // Prompts user for a country name
                             String populationCountry = scanner.nextLine();
 
                             long population = getCountryPopulation(
                                     connection, populationCountry);
 
-                            if (population == -1) {
-                                System.out.println("No results found.");
-                            } else {
-                                System.out.println(populationCountry + ": " + population);
+                            if (population == -1) { // Checks if country was not found
+                                System.out.println("No results found."); // Prints message if country is missing
+                            } else { // Executes if country population is found
+                                System.out.println(populationCountry + ": " + population); // Prints country name and population
                             }
 
                             break;
 
-                        case 11:
+                        case 11: // Choice 11: Population of a city
                             System.out.print("Enter city name: ");
-                            String city = scanner.nextLine();
+                            String city = scanner.nextLine(); // Reads the user's typed city name
 
                             printReport(connection,
                                     "SELECT Name, Population " +
-                                            "FROM city WHERE Name = ?",
-                                    new String[]{city});
+                                            "FROM city WHERE Name = ?", // Filters city by name placeholder
+                                    new String[]{city}); // Passes city name as query parameter
                             break;
 
                         case 12:
@@ -198,50 +198,50 @@ public class Report_base {
                                             "WHERE cl.Language IN " +
                                             "('Chinese', 'English', 'Hindi', 'Spanish', 'Arabic') " +
                                             "GROUP BY cl.Language " +
-                                            "ORDER BY Speakers DESC",
-                                    new String[]{});
-                            break;
+                                            "ORDER BY Speakers DESC", // Calculates speaker totals and percentages
+                                    new String[]{}); // Passes an empty parameter array
+                            break; // Exits switch block
 
-                        case 0:
-                            running = false;
-                            System.out.println("Exiting reports.");
-                            break;
+                        case 0: // Choice 0: Exit application
+                            running = false; // Sets running flag to false to terminate loop
+                            System.out.println("Exiting reports."); // Prints exit confirmation message
+                            break; // Exits switch block
 
-                        default:
-                            System.out.println("Invalid choice. Try again.");
+                        default: // Handles unexpected menu inputs
+                            System.out.println("Invalid choice. Try again."); // Prints message for invalid choice
                     }
 
-                } catch (SQLException e) {
+                } catch (SQLException e) { // Catches database access errors during report execution
                     System.out.println("Could not generate report: " +
-                            e.getMessage());
+                            e.getMessage()); // Prints the SQL error message
                 }
             }
 
-        } finally {
+        } finally { // Ensures database resources cleanup always executes
             try {
-                connection.close();
-                System.out.println("Database connection closed.");
-            } catch (SQLException e) {
-                System.out.println("Could not close database connection.");
+                connection.close(); // Closes the active database connection
+                System.out.println("Database connection closed."); // Prints connection closure message
+            } catch (SQLException e) { // Catches exceptions during connection closure
+                System.out.println("Could not close database connection."); // Prints failure message for closing connection
             }
         }
     }
 
     // Read a positive number for top-N reports
     public static int readLimit(Scanner scanner) {
-        System.out.print("Enter N: ");
+        System.out.print("Enter N: "); // Prompts user to enter limit N
 
         try {
             int limit = Integer.parseInt(scanner.nextLine().trim());
 
-            if (limit > 0) {
-                return limit;
+            if (limit > 0) { // Checks if number is strictly positive
+                return limit; // Returns valid limit
             }
 
-            System.out.println("N must be greater than zero.");
+            System.out.println("N must be greater than zero."); // Prints warning if number is zero or negative
 
-        } catch (NumberFormatException e) {
-            System.out.println("Please enter a valid whole number.");
+        } catch (NumberFormatException e) { // Catches non-integer parsing errors
+            System.out.println("Please enter a valid whole number."); // Prints warning for invalid whole number
         }
 
         return 0;
@@ -251,54 +251,54 @@ public class Report_base {
     private static void printReport(
             Connection connection,
             String sql,
-            String[] parameters) throws SQLException {
+            String[] parameters) throws SQLException { // Helper method to run SQL queries and print formatted results
 
         try (PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+                     connection.prepareStatement(sql)) { // Prepares the SQL query statement
 
-            for (int i = 0; i < parameters.length; i++) {
-                statement.setString(i + 1, parameters[i]);
+            for (int i = 0; i < parameters.length; i++) { // Loops through each query parameter
+                statement.setString(i + 1, parameters[i]); // Binds parameter string value to statement
             }
 
             // LIMIT parameters must be integers, not strings
-            if (sql.contains("LIMIT ?")) {
+            if (sql.contains("LIMIT ?")) { // Checks if query requires an integer LIMIT parameter
                 int limit = Integer.parseInt(
-                        parameters[parameters.length - 1]);
-                statement.setInt(parameters.length, limit);
+                        parameters[parameters.length - 1]); // Extracts limit value from parameters array
+                statement.setInt(parameters.length, limit); // Binds limit as an integer parameter
             }
 
-            try (ResultSet results = statement.executeQuery()) {
+            try (ResultSet results = statement.executeQuery()) { // Executes query and holds result set
 
-                ResultSetMetaData metadata = results.getMetaData();
-                int columns = metadata.getColumnCount();
+                ResultSetMetaData metadata = results.getMetaData(); // Retrieves metadata for column information
+                int columns = metadata.getColumnCount(); // Gets total number of columns in result set
 
-                System.out.println();
+                System.out.println(); // Prints an empty line for spacing
 
-                for (int i = 1; i <= columns; i++) {
+                for (int i = 1; i <= columns; i++) { // Loops through each column
                     System.out.printf("%-25s",
-                            metadata.getColumnLabel(i));
+                            metadata.getColumnLabel(i)); // Prints formatted column header name
                 }
 
                 System.out.println();
-                System.out.println("=".repeat(columns * 25));
+                System.out.println("=".repeat(columns * 25)); // Prints a divider underline matching column widths
 
-                boolean found = false;
+                boolean found = false; // Tracks whether any result rows exist
 
-                while (results.next()) {
-                    found = true;
+                while (results.next()) { // Iterates through each row in result set
+                    found = true; // Marks that results were found
 
-                    for (int i = 1; i <= columns; i++) {
-                        Object value = results.getObject(i);
+                    for (int i = 1; i <= columns; i++) { // Loops through each column in current row
+                        Object value = results.getObject(i); // Retrieves object value for current column
 
                         System.out.printf("%-25s",
-                                value == null ? "NULL" : value.toString());
+                                value == null ? "NULL" : value.toString()); // Prints column value or NULL placeholder
                     }
 
                     System.out.println();
                 }
 
                 if (!found) {
-                    System.out.println("No results found.");
+                    System.out.println("No results found."); // Prints message indicating no records found
                 }
             }
         }
@@ -310,43 +310,43 @@ public class Report_base {
         String url = "jdbc:mysql://" + location + "/world?useSSL=false&allowPublicKeyRetrieval=true";
 
         //Try to 10 times while MySQL starts
-        for (int attempt = 1; attempt <=10; attempt++) {
+        for (int attempt = 1; attempt <=10; attempt++) { // Loops up to 10 times trying to connect
             try {
-                Thread.sleep(delay);
+                Thread.sleep(delay); // Pauses execution for specified delay duration
 
-                Connection connection = DriverManager.getConnection(url, "root", "example");
+                Connection connection = DriverManager.getConnection(url, "root", "example"); // Attempts to connect to MySQL database
 
-                System.out.println("Connected to MySQL.");
-                return connection;
+                System.out.println("Connected to MySQL."); // Prints success message upon connection
+                return connection; // Returns established connection instance
 
-            } catch (SQLException e) {
-                System.out.println("Connection attempt " + attempt + "Failed.");
+            } catch (SQLException e) { // Catches connection failure exceptions
+                System.out.println("Connection attempt " + attempt + "Failed."); // Prints failure notice for current attempt
 
-                if (attempt == 10) {
-                    throw e;
+                if (attempt == 10) { // Checks if final attempt has failed
+                    throw e; // Throws exception after all attempts fail
                 }
 
             }
         }
-        throw new SQLException("Could not connect to MySQL.");
+        throw new SQLException("Could not connect to MySQL."); // Throws exception if loop finishes without connecting
     }
 
     static long getCountryPopulation(
-            Connection connection, String country) throws SQLException {
+            Connection connection, String country) throws SQLException { // Helper method to fetch specific country population
 
-        String sql = "SELECT Population FROM country WHERE Name = ?";
+        String sql = "SELECT Population FROM country WHERE Name = ?"; // Defines SQL query to fetch country population
 
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setString(1, country);
+        try (PreparedStatement statement = connection.prepareStatement(sql)) { // Prepares the population query statement
+            statement.setString(1, country); // Binds country name parameter to query
 
-            try (ResultSet results = statement.executeQuery()) {
-                if (results.next()) {
-                    return results.getLong("Population");
+            try (ResultSet results = statement.executeQuery()) { // Executes query and obtains result set
+                if (results.next()) { // Checks if a matching country record exists
+                    return results.getLong("Population"); // Returns population value as long as integer
                 }
             }
         }
 
         // Country not found.
-        return -1;
+        return -1; // Returns -1 if country does not exist in the database.
     }
 }
