@@ -228,7 +228,7 @@ public class Report_base {
     }
 
     // Read a positive number for top-N reports
-    private static int readLimit(Scanner scanner) {
+    public static int readLimit(Scanner scanner) {
         System.out.print("Enter N: ");
 
         try {
