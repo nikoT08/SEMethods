@@ -12,7 +12,7 @@ import java.util.Scanner;
 public class Report_base {
 
     private static final String DB_URL =
-            "jdbc:mysql://db:33060/world?useSSL=false&allowPublicKeyRetrieval=true";
+            "jdbc:mysql://db:62856/world?useSSL=false&allowPublicKeyRetrieval=true";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "example";
 

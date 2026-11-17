@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class AppTest {
 
     private static final String DEFAULT_DB_URL =
-            "jdbc:mysql://localhost:3306/world?useSSL=false&allowPublicKeyRetrieval=true";
+            "jdbc:mysql://localhost:62856/world?useSSL=false&allowPublicKeyRetrieval=true";
 
     private static String dbUrl;
     private static String dbUser;
