@@ -1,12 +1,16 @@
+yaml
 name: Population project tests
-on: 
+on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
-    UnitTests:
+  UnitTests:
+    name: Unit Tests and Build
     runs-on: ubuntu-22.04
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -21,14 +25,26 @@ jobs:
           distribution: temurin
 
       - name: Unit Tests
-        run: mvn --batch-mode -Dtest=com.napier.devops.AppTest test
+        run: mvn --batch-mode -Dtest=com.napier.sem.AppTest test
+
       - name: CodeCov
         uses: codecov/codecov-action@v2
         with:
           directory: ./target/site/jacoco
           flags: Unit Tests
           verbose: true
-     
+
+      - name: Package application
+        run: mvn --batch-mode package -DskipTests
+
+      - name: Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          automatic_release_tag: "latest"
+          files: |
+            ./target/*.jar     
 
   IntegrationTests:
     name: Integration Tests
