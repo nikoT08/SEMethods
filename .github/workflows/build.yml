@@ -1,4 +1,3 @@
-yaml
 name: Population project tests
 on:
   push:
