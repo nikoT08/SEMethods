@@ -1,4 +1,3 @@
-
 package com.napier.sem;
 
 import java.sql.*;
@@ -8,226 +7,202 @@ public class Report_base {
 
     public static void main(String[] args) throws Exception {
 
-        //Use localHhost when running from intelliJ
+        // localhost is for running in IntelliJ
         String location = "localhost:33060";
         int delay = 2000;
+        int n = 5; // how many to show in the top N reports
 
-        // Docker can supply a different database location and delay
-        if (args.length >=1) {
+        // docker passes these in as arguments
+        if (args.length >= 1) {
             location = args[0];
         }
-
-        if (args.length >=2) {
+        if (args.length >= 2) {
             delay = Integer.parseInt(args[1]);
         }
+        if (args.length >= 3) {
+            n = Integer.parseInt(args[2]);
+        }
+
+        // places to use for the reports
+        String continent = "Asia";
+        String region = "Caribbean";
+        String country = "United Kingdom";
+        String district = "Scotland";
+        String city = "Edinburgh";
 
         Connection connection = connect(location, delay);
 
-        try (Scanner scanner = new Scanner(System.in)) {
+        // these get reused a lot so I put them here
+        String countrySql =
+                "SELECT country.Code, country.Name, country.Continent, country.Region, " +
+                        "country.Population, capital.Name AS Capital " +
+                        "FROM country LEFT JOIN city AS capital ON country.Capital = capital.ID ";
 
-            boolean running = true;
+        String citySql =
+                "SELECT city.Name, country.Name AS Country, city.District, city.Population " +
+                        "FROM city JOIN country ON city.CountryCode = country.Code ";
 
-            while (running) {
-                System.out.println("\n===== WORLD DATABASE REPORTS ====="); // Prints menu header title
-                System.out.println("1. All countries worldwide"); // Prints menu option 1
-                System.out.println("2. Countries by continent");
-                System.out.println("3. Countries by region");
-                System.out.println("4. Top N populated countries worldwide");
-                System.out.println("5. All cities worldwide");
-                System.out.println("6. Cities by country");
-                System.out.println("7. Top N populated cities worldwide");
-                System.out.println("8. All capital cities worldwide");
-                System.out.println("9. Population of the world");
-                System.out.println("10. Population of a country");
-                System.out.println("11. Population of a city");
-                System.out.println("12. Language speaker report"); // prints menu option 12
-                System.out.println("0. Exit");
-                System.out.print("Choose a report: ");
+        String capitalSql =
+                "SELECT city.Name, country.Name AS Country, city.Population " +
+                        "FROM city JOIN country ON country.Capital = city.ID ";
 
-                int choice; // Declares a vatiable to store the user's numeric choices
+        String countryOrder = "ORDER BY country.Population DESC";
+        String cityOrder = "ORDER BY city.Population DESC";
 
-                try {
-                    choice = Integer.parseInt(scanner.nextLine().trim());
-                } catch (NumberFormatException e) {
-                    System.out.println("Please enter a valid number.");
-                    continue;
-                }
+        try {
+            // country reports
+            printReport(connection, "All countries in the world",
+                    countrySql + countryOrder);
+            printReport(connection, "All countries in " + continent,
+                    countrySql + "WHERE country.Continent = ? " + countryOrder, continent);
+            printReport(connection, "All countries in " + region,
+                    countrySql + "WHERE country.Region = ? " + countryOrder, region);
+            printReport(connection, "Top " + n + " countries in the world",
+                    countrySql + countryOrder + " LIMIT ?", n);
+            printReport(connection, "Top " + n + " countries in " + continent,
+                    countrySql + "WHERE country.Continent = ? " + countryOrder + " LIMIT ?", continent, n);
+            printReport(connection, "Top " + n + " countries in " + region,
+                    countrySql + "WHERE country.Region = ? " + countryOrder + " LIMIT ?", region, n);
 
-                try {
-                    switch (choice) {
+            // city reports
+            printReport(connection, "All cities in the world",
+                    citySql + cityOrder);
+            printReport(connection, "All cities in " + continent,
+                    citySql + "WHERE country.Continent = ? " + cityOrder, continent);
+            printReport(connection, "All cities in " + region,
+                    citySql + "WHERE country.Region = ? " + cityOrder, region);
+            printReport(connection, "All cities in " + country,
+                    citySql + "WHERE country.Name = ? " + cityOrder, country);
+            printReport(connection, "All cities in " + district,
+                    citySql + "WHERE city.District = ? " + cityOrder, district);
+            printReport(connection, "Top " + n + " cities in the world",
+                    citySql + cityOrder + " LIMIT ?", n);
+            printReport(connection, "Top " + n + " cities in " + continent,
+                    citySql + "WHERE country.Continent = ? " + cityOrder + " LIMIT ?", continent, n);
+            printReport(connection, "Top " + n + " cities in " + region,
+                    citySql + "WHERE country.Region = ? " + cityOrder + " LIMIT ?", region, n);
+            printReport(connection, "Top " + n + " cities in " + country,
+                    citySql + "WHERE country.Name = ? " + cityOrder + " LIMIT ?", country, n);
+            printReport(connection, "Top " + n + " cities in " + district,
+                    citySql + "WHERE city.District = ? " + cityOrder + " LIMIT ?", district, n);
 
-                        case 1:
-                            printReport(connection,
-                                    "SELECT Code, Name, Continent, Region, " +
-                                            "Population, Capital " +
-                                            "FROM country " +
-                                            "ORDER BY Population DESC",
-                                    new String[]{});
-                            break;
+            // capital city reports
+            printReport(connection, "All capital cities in the world",
+                    capitalSql + cityOrder);
+            printReport(connection, "All capital cities in " + continent,
+                    capitalSql + "WHERE country.Continent = ? " + cityOrder, continent);
+            printReport(connection, "All capital cities in " + region,
+                    capitalSql + "WHERE country.Region = ? " + cityOrder, region);
+            printReport(connection, "Top " + n + " capital cities in the world",
+                    capitalSql + cityOrder + " LIMIT ?", n);
+            printReport(connection, "Top " + n + " capital cities in " + continent,
+                    capitalSql + "WHERE country.Continent = ? " + cityOrder + " LIMIT ?", continent, n);
+            printReport(connection, "Top " + n + " capital cities in " + region,
+                    capitalSql + "WHERE country.Region = ? " + cityOrder + " LIMIT ?", region, n);
 
-                        case 2:
-                            System.out.print("Enter continent: ");
-                            String continent = scanner.nextLine();
+            // people in cities vs not in cities
+            printReport(connection, "Population of each continent", populationSql("country.Continent"));
+            printReport(connection, "Population of each region", populationSql("country.Region"));
+            printReport(connection, "Population of each country", populationSql("country.Name"));
 
-                            printReport(connection,
-                                    "SELECT Code, Name, Continent, Region, " +
-                                            "Population, Capital " +
-                                            "FROM country " +
-                                            "WHERE Continent = ? " +
-                                            "ORDER BY Population DESC",
-                                    new String[]{continent});
-                            break;
+            // just the population numbers
+            printReport(connection, "Population of the world",
+                    "SELECT SUM(Population) AS Population FROM country");
+            printReport(connection, "Population of " + continent,
+                    "SELECT SUM(Population) AS Population FROM country WHERE Continent = ?", continent);
+            printReport(connection, "Population of " + region,
+                    "SELECT SUM(Population) AS Population FROM country WHERE Region = ?", region);
+            printReport(connection, "Population of " + country,
+                    "SELECT Population FROM country WHERE Name = ?", country);
+            printReport(connection, "Population of " + district,
+                    "SELECT SUM(Population) AS Population FROM city WHERE District = ?", district);
+            printReport(connection, "Population of " + city,
+                    "SELECT Name, Population FROM city WHERE Name = ?", city);
 
-                        case 3:
-                            System.out.print("Enter region: ");
-                            String region = scanner.nextLine();
-
-                            printReport(connection,
-                                    "SELECT Code, Name, Continent, Region, " +
-                                            "Population, Capital " +
-                                            "FROM country " +
-                                            "WHERE Region = ? " +
-                                            "ORDER BY Population DESC",
-                                    new String[]{region});
-                            break;
-
-                        case 4:
-                            int countryLimit = readLimit(scanner);
-
-                            if (countryLimit > 0) {
-                                printReport(connection,
-                                        "SELECT Code, Name, Continent, Region, " +
-                                                "Population, Capital " +
-                                                "FROM country " +
-                                                "ORDER BY Population DESC LIMIT ?",
-                                        new String[]{String.valueOf(countryLimit)});
-                            }
-                            break;
-
-                        case 5:
-                            printReport(connection,
-                                    "SELECT city.Name, country.Name AS Country, " +
-                                            "city.District, city.Population " +
-                                            "FROM city " +
-                                            "JOIN country ON city.CountryCode = country.Code " +
-                                            "ORDER BY city.Population DESC",
-                                    new String[]{});
-                            break;
-
-                        case 6:
-                            System.out.print("Enter country name: ");
-                            String country = scanner.nextLine();
-
-                            printReport(connection,
-                                    "SELECT city.Name, country.Name AS Country, " +
-                                            "city.District, city.Population " +
-                                            "FROM city " +
-                                            "JOIN country ON city.CountryCode = country.Code " +
-                                            "WHERE country.Name = ? " +
-                                            "ORDER BY city.Population DESC",
-                                    new String[]{country});
-                            break;
-
-                        case 7:
-                            int cityLimit = readLimit(scanner);
-
-                            if (cityLimit > 0) {
-                                printReport(connection,
-                                        "SELECT city.Name, country.Name AS Country, " +
-                                                "city.District, city.Population " +
-                                                "FROM city " +
-                                                "JOIN country ON city.CountryCode = country.Code " +
-                                                "ORDER BY city.Population DESC LIMIT ?",
-                                        new String[]{String.valueOf(cityLimit)});
-                            }
-                            break;
-
-                        case 8:
-                            printReport(connection,
-                                    "SELECT capital.Name, country.Name AS Country, " +
-                                            "capital.Population " +
-                                            "FROM country " +
-                                            "JOIN city AS capital ON country.Capital = capital.ID " +
-                                            "ORDER BY capital.Population DESC",
-                                    new String[]{});
-                            break;
-
-                        case 9:
-                            printReport(connection,
-                                    "SELECT 'World' AS Name, " +
-                                            "SUM(Population) AS Population " +
-                                            "FROM country",
-                                    new String[]{});
-                            break;
-
-                        case 10:
-                            System.out.print("Enter country name: ");
-                            String populationCountry = scanner.nextLine();
-
-                            long population = getCountryPopulation(
-                                    connection, populationCountry);
-
-                            if (population == -1) {
-                                System.out.println("No results found.");
-                            } else {
-                                System.out.println(populationCountry + ": " + population);
-                            }
-
-                            break;
-
-                        case 11:
-                            System.out.print("Enter city name: ");
-                            String city = scanner.nextLine();
-
-                            printReport(connection,
-                                    "SELECT Name, Population " +
-                                            "FROM city WHERE Name = ?",
-                                    new String[]{city});
-                            break;
-
-                        case 12:
-                            printReport(connection,
-                                    "SELECT cl.Language, " +
-                                            "ROUND(SUM(c.Population * cl.Percentage / 100)) " +
-                                            "AS Speakers, " +
-                                            "ROUND(SUM(c.Population * cl.Percentage / 100) " +
-                                            "/ (SELECT SUM(Population) FROM country) * 100, 2) " +
-                                            "AS WorldPercentage " +
-                                            "FROM countrylanguage cl " +
-                                            "JOIN country c ON cl.CountryCode = c.Code " +
-                                            "WHERE cl.Language IN " +
-                                            "('Chinese', 'English', 'Hindi', 'Spanish', 'Arabic') " +
-                                            "GROUP BY cl.Language " +
-                                            "ORDER BY Speakers DESC",
-                                    new String[]{});
-                            break;
-
-                        case 0:
-                            running = false;
-                            System.out.println("Exiting reports.");
-                            break;
-
-                        default:
-                            System.out.println("Invalid choice. Try again.");
-                    }
-
-                } catch (SQLException e) {
-                    System.out.println("Could not generate report: " +
-                            e.getMessage());
-                }
-            }
+            // languages
+            printReport(connection, "Language speakers",
+                    "SELECT cl.Language, " +
+                            "ROUND(SUM(c.Population * cl.Percentage / 100)) AS Speakers, " +
+                            "ROUND(SUM(c.Population * cl.Percentage / 100) " +
+                            "/ (SELECT SUM(Population) FROM country) * 100, 2) AS WorldPercentage " +
+                            "FROM countrylanguage cl " +
+                            "JOIN country c ON cl.CountryCode = c.Code " +
+                            "WHERE cl.Language IN ('Chinese', 'English', 'Hindi', 'Spanish', 'Arabic') " +
+                            "GROUP BY cl.Language " +
+                            "ORDER BY Speakers DESC");
 
         } finally {
-            try {
-                connection.close();
-                System.out.println("Database connection closed.");
-            } catch (SQLException e) {
-                System.out.println("Could not close database connection.");
-            }
+            connection.close();
+            System.out.println("Database connection closed.");
         }
     }
 
-    // Read a positive number for top-N reports
+    // works out people living in cities and not in cities
+    // adds up the cities for each country first so nothing gets counted twice
+    static String populationSql(String groupColumn) {
+        return "SELECT " + groupColumn + " AS Name, " +
+                "SUM(country.Population) AS Population, " +
+                "SUM(IFNULL(c.CityPop, 0)) AS InCities, " +
+                "ROUND(SUM(IFNULL(c.CityPop, 0)) / SUM(country.Population) * 100, 2) AS InCitiesPercent, " +
+                "SUM(country.Population) - SUM(IFNULL(c.CityPop, 0)) AS NotInCities, " +
+                "ROUND((SUM(country.Population) - SUM(IFNULL(c.CityPop, 0))) " +
+                "/ SUM(country.Population) * 100, 2) AS NotInCitiesPercent " +
+                "FROM country " +
+                "LEFT JOIN (SELECT CountryCode, SUM(Population) AS CityPop " +
+                "FROM city GROUP BY CountryCode) c ON c.CountryCode = country.Code " +
+                "GROUP BY " + groupColumn + " " +
+                "ORDER BY Population DESC";
+    }
+
+    // runs the sql and prints the results as a table
+    // parameters fill in the ? in the sql
+    static void printReport(Connection connection, String title, String sql, Object... parameters) {
+
+        System.out.println();
+        System.out.println(title);
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            for (int i = 0; i < parameters.length; i++) {
+                statement.setObject(i + 1, parameters[i]);
+            }
+
+            try (ResultSet results = statement.executeQuery()) {
+
+                int columns = results.getMetaData().getColumnCount();
+
+                // column names
+                String header = "";
+                for (int i = 1; i <= columns; i++) {
+                    if (i > 1) header += ", ";
+                    header += results.getMetaData().getColumnLabel(i);
+                }
+                System.out.println(header);
+
+                boolean found = false;
+
+                // one line per row
+                while (results.next()) {
+                    found = true;
+                    String line = "";
+                    for (int i = 1; i <= columns; i++) {
+                        if (i > 1) line += ", ";
+                        line += results.getString(i);
+                    }
+                    System.out.println(line);
+                }
+
+                if (!found) {
+                    System.out.println("No results found.");
+                }
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Could not generate report: " + e.getMessage());
+        }
+    }
+
+    // asks for N and makes sure it's a positive number (used by the tests)
     public static int readLimit(Scanner scanner) {
         System.out.print("Enter N: ");
 
@@ -247,92 +222,8 @@ public class Report_base {
         return 0;
     }
 
-    // Execute a report and print its column names and results
-    private static void printReport(
-            Connection connection,
-            String sql,
-            String[] parameters) throws SQLException {
-
-        try (PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
-
-            for (int i = 0; i < parameters.length; i++) {
-                statement.setString(i + 1, parameters[i]);
-            }
-
-            // LIMIT parameters must be integers, not strings
-            if (sql.contains("LIMIT ?")) {
-                int limit = Integer.parseInt(
-                        parameters[parameters.length - 1]);
-                statement.setInt(parameters.length, limit);
-            }
-
-            try (ResultSet results = statement.executeQuery()) {
-
-                ResultSetMetaData metadata = results.getMetaData();
-                int columns = metadata.getColumnCount();
-
-                System.out.println();
-
-                for (int i = 1; i <= columns; i++) {
-                    System.out.printf("%-25s",
-                            metadata.getColumnLabel(i));
-                }
-
-                System.out.println();
-                System.out.println("=".repeat(columns * 25));
-
-                boolean found = false;
-
-                while (results.next()) {
-                    found = true;
-
-                    for (int i = 1; i <= columns; i++) {
-                        Object value = results.getObject(i);
-
-                        System.out.printf("%-25s",
-                                value == null ? "NULL" : value.toString());
-                    }
-
-                    System.out.println();
-                }
-
-                if (!found) {
-                    System.out.println("No results found.");
-                }
-            }
-        }
-    }
-
-    static Connection connect(String location, int delay)
-        throws SQLException, InterruptedException {
-
-        String url = "jdbc:mysql://" + location + "/world?useSSL=false&allowPublicKeyRetrieval=true";
-
-        //Try to 10 times while MySQL starts
-        for (int attempt = 1; attempt <=10; attempt++) {
-            try {
-                Thread.sleep(delay);
-
-                Connection connection = DriverManager.getConnection(url, "root", "example");
-
-                System.out.println("Connected to MySQL.");
-                return connection;
-
-            } catch (SQLException e) {
-                System.out.println("Connection attempt " + attempt + "Failed.");
-
-                if (attempt == 10) {
-                    throw e;
-                }
-
-            }
-        }
-        throw new SQLException("Could not connect to MySQL.");
-    }
-
-    static long getCountryPopulation(
-            Connection connection, String country) throws SQLException {
+    // gets one country's population, or -1 if it isn't found (used by the tests)
+    static long getCountryPopulation(Connection connection, String country) throws SQLException {
 
         String sql = "SELECT Population FROM country WHERE Name = ?";
 
@@ -346,7 +237,29 @@ public class Report_base {
             }
         }
 
-        // Country not found.
         return -1;
+    }
+
+    static Connection connect(String location, int delay)
+            throws SQLException, InterruptedException {
+
+        String url = "jdbc:mysql://" + location + "/world?useSSL=false&allowPublicKeyRetrieval=true";
+
+        // keep trying because mysql takes a while to start
+        for (int attempt = 1; attempt <= 10; attempt++) {
+            try {
+                Thread.sleep(delay);
+                Connection connection = DriverManager.getConnection(url, "root", "example");
+                System.out.println("Connected to MySQL.");
+                return connection;
+
+            } catch (SQLException e) {
+                System.out.println("Connection attempt " + attempt + " failed.");
+                if (attempt == 10) {
+                    throw e;
+                }
+            }
+        }
+        throw new SQLException("Could not connect to MySQL.");
     }
 }
