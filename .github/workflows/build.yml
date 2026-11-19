@@ -5,7 +5,9 @@ jobs:
   build:
     name: Unit Tests and Build
     runs-on: ubuntu-22.04
-
+    permissions: 
+      contents: write
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -26,7 +28,15 @@ jobs:
 
       - name: Build application Docker image
         run: docker compose build app
-
+      - name: Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          automatic_release_tag: "latest"
+          files: |
+            ./target/*.jar
+        
   IntegrationTests:
     name: Integration Tests
     runs-on: ubuntu-22.04
