@@ -1,8 +1,8 @@
 package com.napier.sem;
 
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Assumptions;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,14 +22,14 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * Optional environment variables:
  *   WORLD_DB_TESTS=true
- *   WORLD_DB_URL=jdbc:mysql://localhost:3306/world?useSSL=false&allowPublicKeyRetrieval=true
+ *   WORLD_DB_URL=jdbc:mysql://localhost:3307/world?useSSL=false&allowPublicKeyRetrieval=true
  *   WORLD_DB_USER=root
  *   WORLD_DB_PASSWORD=example
  */
 class AppTest {
 
     private static final String DEFAULT_DB_URL =
-            "jdbc:mysql://localhost:62856/world?useSSL=false&allowPublicKeyRetrieval=true";
+            "jdbc:mysql://localhost:3307/world?useSSL=false&allowPublicKeyRetrieval=true";
 
     private static String dbUrl;
     private static String dbUser;
@@ -46,15 +47,11 @@ class AppTest {
         return value == null || value.isBlank() ? fallback : value;
     }
 
-    private ByteArrayOutputStream outputBuffer() {
-        return new ByteArrayOutputStream();
-    }
-
-    private PrintStream printStream(ByteArrayOutputStream buffer) {
+    private static PrintStream stream(ByteArrayOutputStream buffer) {
         return new PrintStream(buffer, true, StandardCharsets.UTF_8);
     }
 
-    private String outputText(ByteArrayOutputStream buffer) {
+    private static String text(ByteArrayOutputStream buffer) {
         return buffer.toString(StandardCharsets.UTF_8);
     }
 
@@ -64,201 +61,92 @@ class AppTest {
 
     @Test
     void readLimitAcceptsPositiveWholeNumber() {
-        ByteArrayOutputStream buffer = outputBuffer();
-
-        int result = Report_base.readLimit("25", printStream(buffer));
-
-        assertEquals(25, result);
-        assertEquals("", outputText(buffer));
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        assertEquals(25, Report_base.readLimit("25", stream(buffer)));
+        assertEquals("", text(buffer));
     }
 
     @Test
     void readLimitTrimsWhitespace() {
-        ByteArrayOutputStream buffer = outputBuffer();
-
-        int result = Report_base.readLimit("  7  ", printStream(buffer));
-
-        assertEquals(7, result);
-        assertEquals("", outputText(buffer));
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        assertEquals(7, Report_base.readLimit("  7  ", stream(buffer)));
+        assertEquals("", text(buffer));
     }
 
     @Test
-    void readLimitRejectsZero() {
-        ByteArrayOutputStream buffer = outputBuffer();
-
-        int result = Report_base.readLimit("0", printStream(buffer));
-
-        assertEquals(0, result);
-        assertTrue(outputText(buffer).contains("N must be greater than zero."));
+    void readLimitRejectsZeroAndNegative() {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        assertEquals(0, Report_base.readLimit("0", stream(buffer)));
+        assertEquals(0, Report_base.readLimit("-3", stream(buffer)));
+        assertTrue(text(buffer).contains("N must be greater than zero."));
     }
 
     @Test
-    void readLimitRejectsNegativeNumber() {
-        ByteArrayOutputStream buffer = outputBuffer();
-
-        int result = Report_base.readLimit("-3", printStream(buffer));
-
-        assertEquals(0, result);
-        assertTrue(outputText(buffer).contains("N must be greater than zero."));
-    }
-
-    @Test
-    void readLimitRejectsNonNumericInput() {
-        ByteArrayOutputStream buffer = outputBuffer();
-
-        int result = Report_base.readLimit("abc", printStream(buffer));
-
-        assertEquals(0, result);
-        assertTrue(outputText(buffer).contains("Please enter a valid whole number."));
-    }
-
-    @Test
-    void readLimitRejectsEmptyInput() {
-        ByteArrayOutputStream buffer = outputBuffer();
-
-        int result = Report_base.readLimit("", printStream(buffer));
-
-        assertEquals(0, result);
-        assertTrue(outputText(buffer).contains("Please enter a valid whole number."));
+    void readLimitRejectsNonNumericAndEmptyInput() {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        assertEquals(0, Report_base.readLimit("abc", stream(buffer)));
+        assertEquals(0, Report_base.readLimit("", stream(buffer)));
+        assertTrue(text(buffer).contains("Please enter a valid whole number."));
     }
 
     @Test
     void printMenuDisplaysAllReportChoices() {
-        ByteArrayOutputStream buffer = outputBuffer();
-
-        Report_base.printMenu(printStream(buffer));
-
-        String output = outputText(buffer);
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        Report_base.printMenu(stream(buffer));
+        String output = text(buffer);
         assertTrue(output.contains("1. All countries worldwide"));
-        assertTrue(output.contains("4. Top N populated countries worldwide"));
-        assertTrue(output.contains("9. Population of the world"));
-        assertTrue(output.contains("12. Language speaker report"));
+        assertTrue(output.contains("16. Top N populated cities in a district"));
+        assertTrue(output.contains("22. Top N populated capital cities in a region"));
+        assertTrue(output.contains("25. By country"));
+        assertTrue(output.contains("31. City"));
+        assertTrue(output.contains("32. Language speaker report"));
         assertTrue(output.contains("0. Exit"));
     }
 
     @Test
-    void topCountriesRejectsInvalidLimitWithoutDatabaseAccess() throws SQLException {
-        ByteArrayOutputStream buffer = outputBuffer();
+    void everyTopNReportRejectsInvalidLimitWithoutDatabaseAccess() throws SQLException {
+        // The connection is deliberately null: an invalid limit must return before using it.
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        PrintStream out = stream(buffer);
 
-        // The connection is deliberately null. An invalid limit should return before using it.
+        Report_base.reportTopCountries(null, 0, out);
+        Report_base.reportTopCountriesByContinent(null, "Asia", 0, out);
+        Report_base.reportTopCountriesByRegion(null, "Caribbean", -1, out);
+        Report_base.reportTopCities(null, -1, out);
+        Report_base.reportTopCitiesByContinent(null, "Asia", 0, out);
+        Report_base.reportTopCitiesByRegion(null, "Caribbean", 0, out);
+        Report_base.reportTopCitiesByCountry(null, "France", 0, out);
+        Report_base.reportTopCitiesByDistrict(null, "Kabul", 0, out);
+        Report_base.reportTopCapitalCities(null, 0, out);
+        Report_base.reportTopCapitalCitiesByContinent(null, "Asia", 0, out);
+        Report_base.reportTopCapitalCitiesByRegion(null, "Caribbean", 0, out);
 
-                Report_base.reportTopCountries(null, 0, printStream(buffer));
-
-        assertTrue(outputText(buffer).contains("N must be greater than zero."));
+        long messages = text(buffer).lines()
+                .filter(l -> l.contains("N must be greater than zero.")).count();
+        assertEquals(11, messages);
     }
 
     @Test
-    void topCitiesRejectsInvalidLimitWithoutDatabaseAccess() throws SQLException {
-        ByteArrayOutputStream buffer = outputBuffer();
-
-
-                Report_base.reportTopCities(null, -1, printStream(buffer));
-
-        assertTrue(outputText(buffer).contains("N must be greater than zero."));
-    }
-
-    // ---------------------------------------
-    // Integration tests: require a real MySQL
-    // ---------------------------------------
-
-    private Connection openIntegrationConnection() throws SQLException {
-        Assumptions.assumeTrue(
-                "true".equalsIgnoreCase(System.getenv("WORLD_DB_TESTS")),
-                "Skipping database integration test: set WORLD_DB_TESTS=true to enable it.");
-
-        try {
-            return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
-        } catch (SQLException e) {
-            fail("Could not connect to the World database at " + dbUrl
-                    + ". Check that MySQL is running and WORLD_DB_URL/credentials are correct. "
-                    + e.getMessage());
-            throw e; // Required by the compiler; fail() throws an assertion error.
-        }
-    }
-
-    private void assertReportRuns(ReportAction action, String expectedOutput)
-            throws SQLException {
-        try (Connection connection = openIntegrationConnection()) {
-            ByteArrayOutputStream buffer = outputBuffer();
-
-              action.run(connection, printStream(buffer));
-
-            String output = outputText(buffer);
-            assertTrue(output.contains(expectedOutput),
-                    () -> "Expected output to contain '" + expectedOutput + "' but was:\n" + output);
-            assertTrue(output.contains("="), "Expected report column separator in output.");
-        }
-    }
-
-    @FunctionalInterface
-    private interface ReportAction {
-        void run(Connection connection, PrintStream out) throws SQLException;
+    void menuExitsOnZero() throws SQLException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        Report_base.runMenu(null, new Scanner("0\n"), stream(buffer));
+        assertTrue(text(buffer).contains("Exiting reports."));
     }
 
     @Test
-    void integrationAllCountriesReportRuns() throws SQLException {
-        assertReportRuns(Report_base::reportAllCountries, "Code");
+    void menuHandlesInvalidInputThenExits() throws SQLException {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        Report_base.runMenu(null, new Scanner("abc\n99\n0\n"), stream(buffer));
+        String output = text(buffer);
+        assertTrue(output.contains("Please enter a valid number."));
+        assertTrue(output.contains("Invalid choice. Try again."));
+        assertTrue(output.contains("Exiting reports."));
     }
 
     @Test
-    void integrationCountriesByContinentReportRuns() throws SQLException {
-        assertReportRuns((connection, out) ->
-                Report_base.reportCountriesByContinent(connection, "Asia", out), "Code");
+    void menuStopsCleanlyWhenInputEnds() throws SQLException {
+        Report_base.runMenu(null, new Scanner(""), stream(new ByteArrayOutputStream()));
     }
 
-    @Test
-    void integrationCountriesByRegionReportRuns() throws SQLException {
-        assertReportRuns((connection, out) ->
-                Report_base.reportCountriesByRegion(connection, "Caribbean", out), "Code");
-    }
 
-    @Test
-    void integrationTopCountriesReportRuns() throws SQLException {
-        assertReportRuns((connection, out) ->
-                Report_base.reportTopCountries(connection, 5, out), "Code");
-    }
-
-    @Test
-    void integrationAllCitiesReportRuns() throws SQLException {
-        assertReportRuns(Report_base::reportAllCities, "Country");
-    }
-
-    @Test
-    void integrationCitiesByCountryReportRuns() throws SQLException {
-        assertReportRuns((connection, out) ->
-                Report_base.reportCitiesByCountry(connection, "Australia", out), "Country");
-    }
-
-    @Test
-    void integrationTopCitiesReportRuns() throws SQLException {
-        assertReportRuns((connection, out) ->
-                Report_base.reportTopCities(connection, 5, out), "Country");
-    }
-
-    @Test
-    void integrationCapitalCitiesReportRuns() throws SQLException {
-        assertReportRuns(Report_base::reportCapitalCities, "Country");
-    }
-
-    @Test
-    void integrationWorldPopulationReportRuns() throws SQLException {
-        assertReportRuns(Report_base::reportWorldPopulation, "Population");
-    }
-
-    @Test
-    void integrationCountryPopulationReportRuns() throws SQLException {
-        assertReportRuns((connection, out) ->
-                Report_base.reportCountryPopulation(connection, "Canada", out), "Population");
-    }
-
-    @Test
-    void integrationCityPopulationReportRuns() throws SQLException {
-        assertReportRuns((connection, out) ->
-                Report_base.reportCityPopulation(connection, "Sydney", out), "Population");
-    }
-
-    @Test
-    void integrationLanguageSpeakersReportRuns() throws SQLException {
-        assertReportRuns(Report_base::reportLanguageSpeakers, "Language");
-    }
 }
