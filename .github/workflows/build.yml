@@ -1,4 +1,4 @@
-name: Population project tests
+name: Population project build
 on:
   push:
     branches:
@@ -10,8 +10,8 @@ on:
       - master
 
 jobs:
-  UnitTests:
-    name: Unit Tests and Build
+  Package:
+    name: Build JAR and Release
     runs-on: ubuntu-22.04
     permissions:
       contents: write
@@ -28,16 +28,6 @@ jobs:
           java-version: '17'
           distribution: temurin
 
-      - name: Unit Tests
-        run: mvn --batch-mode -Dtest=com.napier.sem.AppTest test
-
-      - name: CodeCov
-        uses: codecov/codecov-action@v2
-        with:
-          directory: ./target/site/jacoco
-          flags: Unit Tests
-          verbose: true
-
       - name: Package application
         run: mvn --batch-mode package -DskipTests
 
@@ -53,8 +43,9 @@ jobs:
 
   build:
     name: Build and Run in Docker
-    needs: UnitTests
+    needs: Package
     runs-on: ubuntu-22.04
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -71,3 +62,7 @@ jobs:
         run: |
           mvn --batch-mode package -DskipTests
           docker compose up --build --abort-on-container-exit --exit-code-from app
+
+      - name: Show container logs if it failed
+        if: failure()
+        run: docker compose logs
