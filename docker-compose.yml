@@ -1,11 +1,12 @@
-
 services:
 
   # Build app from Dockerfile in same folder
   app:
     build: .
-    stdin_open: true
-    tty: true
+    depends_on:
+      - db
+    environment:
+      - DB_LOCATION=db:3306
 
   # Build the db as name world from the Dockerfile in the db folder
   # exposing the port if we want to run code outside a container
