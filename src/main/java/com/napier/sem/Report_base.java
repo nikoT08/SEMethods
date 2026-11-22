@@ -8,7 +8,9 @@ public class Report_base {
     public static void main(String[] args) throws Exception {
 
         // localhost is for running in IntelliJ
-        String location = "localhost:33060";
+        // localhost is for running in IntelliJ
+        String location = System.getenv("DB_LOCATION") != null
+                ? System.getenv("DB_LOCATION") : "localhost:3307";
         int delay = 2000;
         int n = 5; // how many to show in the top N reports
 
