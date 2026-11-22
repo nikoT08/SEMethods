@@ -1,20 +1,85 @@
 package com.napier.sem;
 
+import java.io.PrintStream;
 import java.sql.*;
 import java.util.Scanner;
+import java.util.StringJoiner;
 
+/**
+ * Population reports for the MySQL world database.
+ * Runs every report automatically (no user input).
+ *
+ * Optional arguments: [0] database location, [1] delay between connection attempts (ms),
+ * [2] N for the "top N" reports. The location can also come from the DB_LOCATION
+ * environment variable (docker-compose sets it to db:3306).
+ */
 public class Report_base {
 
-    public static void main(String[] args) throws Exception {
+    // connection defaults - localhost:3307 is the port docker-compose publishes for IntelliJ runs
+    static final String DEFAULT_LOCATION = "localhost:3307";
+    static final int DEFAULT_DELAY = 2000;
+    static final int DEFAULT_N = 5; // how many to show in the top N reports
+    static final int MAX_ATTEMPTS = 30;
+    static final String DB_USER = "root";
+    static final String DB_PASSWORD = "example";
 
-        // localhost is for running in IntelliJ
+    // places to use for the reports
+    static final String CONTINENT = "Asia";
+    static final String REGION = "Caribbean";
+    static final String COUNTRY = "United Kingdom";
+    static final String DISTRICT = "Scotland";
+    static final String CITY = "Edinburgh";
+
+    // these get reused a lot so I put them here (each select ends with a space)
+    static final String COUNTRY_SQL =
+            "SELECT country.Code, country.Name, country.Continent, country.Region, " +
+                    "country.Population, capital.Name AS Capital " +
+                    "FROM country LEFT JOIN city AS capital ON country.Capital = capital.ID ";
+
+    static final String CITY_SQL =
+            "SELECT city.Name, country.Name AS Country, city.District, city.Population " +
+                    "FROM city JOIN country ON city.CountryCode = country.Code ";
+
+    static final String CAPITAL_SQL =
+            "SELECT city.Name, country.Name AS Country, city.Population " +
+                    "FROM city JOIN country ON country.Capital = city.ID ";
+
+    static final String COUNTRY_ORDER = "ORDER BY country.Population DESC";
+    static final String CITY_ORDER = "ORDER BY city.Population DESC";
+
+    static final String LANGUAGE_SQL =
+            "SELECT cl.Language, " +
+                    "ROUND(SUM(c.Population * cl.Percentage / 100)) AS Speakers, " +
+                    "ROUND(SUM(c.Population * cl.Percentage / 100) " +
+                    "/ (SELECT SUM(Population) FROM country) * 100, 2) AS WorldPercentage " +
+                    "FROM countrylanguage cl " +
+                    "JOIN country c ON cl.CountryCode = c.Code " +
+                    "WHERE cl.Language IN ('Chinese', 'English', 'Hindi', 'Spanish', 'Arabic') " +
+                    "GROUP BY cl.Language " +
+                    "ORDER BY Speakers DESC";
+
+    /** Runs every report. Exits with code 1 if any report failed (so CI can see it). */
+    public static void main(String[] args) throws Exception {
+        int failures = run(args);
+        if (failures > 0) {
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Reads the arguments, connects, runs every report and closes the connection.
+     *
+     * @return the number of reports that failed (0 means everything ran)
+     */
+    static int run(String[] args) throws Exception {
+
         // localhost is for running in IntelliJ
         String location = System.getenv("DB_LOCATION") != null
-                ? System.getenv("DB_LOCATION") : "localhost:3307";
-        int delay = 2000;
-        int n = 5; // how many to show in the top N reports
+                ? System.getenv("DB_LOCATION") : DEFAULT_LOCATION;
+        int delay = DEFAULT_DELAY;
+        int n = DEFAULT_N;
 
-        // docker passes these in as arguments
+        // docker can pass these in as arguments
         if (args.length >= 1) {
             location = args[0];
         }
@@ -24,119 +89,117 @@ public class Report_base {
         if (args.length >= 3) {
             n = Integer.parseInt(args[2]);
         }
-
-        // places to use for the reports
-        String continent = "Asia";
-        String region = "Caribbean";
-        String country = "United Kingdom";
-        String district = "Scotland";
-        String city = "Edinburgh";
+        if (n <= 0) {
+            throw new IllegalArgumentException("N must be greater than zero.");
+        }
 
         Connection connection = connect(location, delay);
 
-        // these get reused a lot so I put them here
-        String countrySql =
-                "SELECT country.Code, country.Name, country.Continent, country.Region, " +
-                        "country.Population, capital.Name AS Capital " +
-                        "FROM country LEFT JOIN city AS capital ON country.Capital = capital.ID ";
-
-        String citySql =
-                "SELECT city.Name, country.Name AS Country, city.District, city.Population " +
-                        "FROM city JOIN country ON city.CountryCode = country.Code ";
-
-        String capitalSql =
-                "SELECT city.Name, country.Name AS Country, city.Population " +
-                        "FROM city JOIN country ON country.Capital = city.ID ";
-
-        String countryOrder = "ORDER BY country.Population DESC";
-        String cityOrder = "ORDER BY city.Population DESC";
-
         try {
-            // country reports
-            printReport(connection, "All countries in the world",
-                    countrySql + countryOrder);
-            printReport(connection, "All countries in " + continent,
-                    countrySql + "WHERE country.Continent = ? " + countryOrder, continent);
-            printReport(connection, "All countries in " + region,
-                    countrySql + "WHERE country.Region = ? " + countryOrder, region);
-            printReport(connection, "Top " + n + " countries in the world",
-                    countrySql + countryOrder + " LIMIT ?", n);
-            printReport(connection, "Top " + n + " countries in " + continent,
-                    countrySql + "WHERE country.Continent = ? " + countryOrder + " LIMIT ?", continent, n);
-            printReport(connection, "Top " + n + " countries in " + region,
-                    countrySql + "WHERE country.Region = ? " + countryOrder + " LIMIT ?", region, n);
-
-            // city reports
-            printReport(connection, "All cities in the world",
-                    citySql + cityOrder);
-            printReport(connection, "All cities in " + continent,
-                    citySql + "WHERE country.Continent = ? " + cityOrder, continent);
-            printReport(connection, "All cities in " + region,
-                    citySql + "WHERE country.Region = ? " + cityOrder, region);
-            printReport(connection, "All cities in " + country,
-                    citySql + "WHERE country.Name = ? " + cityOrder, country);
-            printReport(connection, "All cities in " + district,
-                    citySql + "WHERE city.District = ? " + cityOrder, district);
-            printReport(connection, "Top " + n + " cities in the world",
-                    citySql + cityOrder + " LIMIT ?", n);
-            printReport(connection, "Top " + n + " cities in " + continent,
-                    citySql + "WHERE country.Continent = ? " + cityOrder + " LIMIT ?", continent, n);
-            printReport(connection, "Top " + n + " cities in " + region,
-                    citySql + "WHERE country.Region = ? " + cityOrder + " LIMIT ?", region, n);
-            printReport(connection, "Top " + n + " cities in " + country,
-                    citySql + "WHERE country.Name = ? " + cityOrder + " LIMIT ?", country, n);
-            printReport(connection, "Top " + n + " cities in " + district,
-                    citySql + "WHERE city.District = ? " + cityOrder + " LIMIT ?", district, n);
-
-            // capital city reports
-            printReport(connection, "All capital cities in the world",
-                    capitalSql + cityOrder);
-            printReport(connection, "All capital cities in " + continent,
-                    capitalSql + "WHERE country.Continent = ? " + cityOrder, continent);
-            printReport(connection, "All capital cities in " + region,
-                    capitalSql + "WHERE country.Region = ? " + cityOrder, region);
-            printReport(connection, "Top " + n + " capital cities in the world",
-                    capitalSql + cityOrder + " LIMIT ?", n);
-            printReport(connection, "Top " + n + " capital cities in " + continent,
-                    capitalSql + "WHERE country.Continent = ? " + cityOrder + " LIMIT ?", continent, n);
-            printReport(connection, "Top " + n + " capital cities in " + region,
-                    capitalSql + "WHERE country.Region = ? " + cityOrder + " LIMIT ?", region, n);
-
-            // people in cities vs not in cities
-            printReport(connection, "Population of each continent", populationSql("country.Continent"));
-            printReport(connection, "Population of each region", populationSql("country.Region"));
-            printReport(connection, "Population of each country", populationSql("country.Name"));
-
-            // just the population numbers
-            printReport(connection, "Population of the world",
-                    "SELECT SUM(Population) AS Population FROM country");
-            printReport(connection, "Population of " + continent,
-                    "SELECT SUM(Population) AS Population FROM country WHERE Continent = ?", continent);
-            printReport(connection, "Population of " + region,
-                    "SELECT SUM(Population) AS Population FROM country WHERE Region = ?", region);
-            printReport(connection, "Population of " + country,
-                    "SELECT Population FROM country WHERE Name = ?", country);
-            printReport(connection, "Population of " + district,
-                    "SELECT SUM(Population) AS Population FROM city WHERE District = ?", district);
-            printReport(connection, "Population of " + city,
-                    "SELECT Name, Population FROM city WHERE Name = ?", city);
-
-            // languages
-            printReport(connection, "Language speakers",
-                    "SELECT cl.Language, " +
-                            "ROUND(SUM(c.Population * cl.Percentage / 100)) AS Speakers, " +
-                            "ROUND(SUM(c.Population * cl.Percentage / 100) " +
-                            "/ (SELECT SUM(Population) FROM country) * 100, 2) AS WorldPercentage " +
-                            "FROM countrylanguage cl " +
-                            "JOIN country c ON cl.CountryCode = c.Code " +
-                            "WHERE cl.Language IN ('Chinese', 'English', 'Hindi', 'Spanish', 'Arabic') " +
-                            "GROUP BY cl.Language " +
-                            "ORDER BY Speakers DESC");
-
+            return runAllReports(connection, System.out, n);
         } finally {
             connection.close();
             System.out.println("Database connection closed.");
         }
+    }
+
+    /**
+     * Runs all 32 reports once, in order, writing to the given stream.
+     * A report that fails is printed and skipped so the rest still run.
+     *
+     * @return the number of reports that failed
+     */
+    static int runAllReports(Connection connection, PrintStream out, int n) {
+
+        String continent = CONTINENT;
+        String region = REGION;
+        String country = COUNTRY;
+        String district = DISTRICT;
+        String city = CITY;
+        int failures = 0;
+
+        // country reports
+        failures += runReport(connection, out, "All countries in the world",
+                COUNTRY_SQL + COUNTRY_ORDER);
+        failures += runReport(connection, out, "All countries in " + continent,
+                COUNTRY_SQL + "WHERE country.Continent = ? " + COUNTRY_ORDER, continent);
+        failures += runReport(connection, out, "All countries in " + region,
+                COUNTRY_SQL + "WHERE country.Region = ? " + COUNTRY_ORDER, region);
+        failures += runReport(connection, out, "Top " + n + " countries in the world",
+                COUNTRY_SQL + COUNTRY_ORDER + " LIMIT ?", n);
+        failures += runReport(connection, out, "Top " + n + " countries in " + continent,
+                COUNTRY_SQL + "WHERE country.Continent = ? " + COUNTRY_ORDER + " LIMIT ?", continent, n);
+        failures += runReport(connection, out, "Top " + n + " countries in " + region,
+                COUNTRY_SQL + "WHERE country.Region = ? " + COUNTRY_ORDER + " LIMIT ?", region, n);
+
+        // city reports
+        failures += runReport(connection, out, "All cities in the world",
+                CITY_SQL + CITY_ORDER);
+        failures += runReport(connection, out, "All cities in " + continent,
+                CITY_SQL + "WHERE country.Continent = ? " + CITY_ORDER, continent);
+        failures += runReport(connection, out, "All cities in " + region,
+                CITY_SQL + "WHERE country.Region = ? " + CITY_ORDER, region);
+        failures += runReport(connection, out, "All cities in " + country,
+                CITY_SQL + "WHERE country.Name = ? " + CITY_ORDER, country);
+        failures += runReport(connection, out, "All cities in " + district,
+                CITY_SQL + "WHERE city.District = ? " + CITY_ORDER, district);
+        failures += runReport(connection, out, "Top " + n + " cities in the world",
+                CITY_SQL + CITY_ORDER + " LIMIT ?", n);
+        failures += runReport(connection, out, "Top " + n + " cities in " + continent,
+                CITY_SQL + "WHERE country.Continent = ? " + CITY_ORDER + " LIMIT ?", continent, n);
+        failures += runReport(connection, out, "Top " + n + " cities in " + region,
+                CITY_SQL + "WHERE country.Region = ? " + CITY_ORDER + " LIMIT ?", region, n);
+        failures += runReport(connection, out, "Top " + n + " cities in " + country,
+                CITY_SQL + "WHERE country.Name = ? " + CITY_ORDER + " LIMIT ?", country, n);
+        failures += runReport(connection, out, "Top " + n + " cities in " + district,
+                CITY_SQL + "WHERE city.District = ? " + CITY_ORDER + " LIMIT ?", district, n);
+
+        // capital city reports
+        failures += runReport(connection, out, "All capital cities in the world",
+                CAPITAL_SQL + CITY_ORDER);
+        failures += runReport(connection, out, "All capital cities in " + continent,
+                CAPITAL_SQL + "WHERE country.Continent = ? " + CITY_ORDER, continent);
+        failures += runReport(connection, out, "All capital cities in " + region,
+                CAPITAL_SQL + "WHERE country.Region = ? " + CITY_ORDER, region);
+        failures += runReport(connection, out, "Top " + n + " capital cities in the world",
+                CAPITAL_SQL + CITY_ORDER + " LIMIT ?", n);
+        failures += runReport(connection, out, "Top " + n + " capital cities in " + continent,
+                CAPITAL_SQL + "WHERE country.Continent = ? " + CITY_ORDER + " LIMIT ?", continent, n);
+        failures += runReport(connection, out, "Top " + n + " capital cities in " + region,
+                CAPITAL_SQL + "WHERE country.Region = ? " + CITY_ORDER + " LIMIT ?", region, n);
+
+        // people in cities vs not in cities
+        failures += runReport(connection, out, "Population of each continent",
+                populationSql("country.Continent"));
+        failures += runReport(connection, out, "Population of each region",
+                populationSql("country.Region"));
+        failures += runReport(connection, out, "Population of each country",
+                populationSql("country.Name"));
+
+        // just the population numbers
+        failures += runReport(connection, out, "Population of the world",
+                "SELECT SUM(Population) AS Population FROM country");
+        failures += runReport(connection, out, "Population of " + continent,
+                "SELECT SUM(Population) AS Population FROM country WHERE Continent = ?", continent);
+        failures += runReport(connection, out, "Population of " + region,
+                "SELECT SUM(Population) AS Population FROM country WHERE Region = ?", region);
+        failures += runReport(connection, out, "Population of " + country,
+                "SELECT Population FROM country WHERE Name = ?", country);
+        failures += runReport(connection, out, "Population of " + district,
+                "SELECT SUM(Population) AS Population FROM city WHERE District = ?", district);
+        failures += runReport(connection, out, "Population of " + city,
+                "SELECT Name, Population FROM city WHERE Name = ?", city);
+
+        // languages
+        failures += runReport(connection, out, "Language speakers", LANGUAGE_SQL);
+
+        return failures;
+    }
+
+    /** Runs one report and returns 1 if it failed or 0 if it worked. */
+    private static int runReport(Connection connection, PrintStream out,
+                                 String title, String sql, Object... parameters) {
+        return printReport(connection, out, title, sql, parameters) ? 0 : 1;
     }
 
     // works out people living in cities and not in cities
@@ -156,12 +219,22 @@ public class Report_base {
                 "ORDER BY Population DESC";
     }
 
-    // runs the sql and prints the results as a table
+    // runs the sql and prints the results to System.out
     // parameters fill in the ? in the sql
     static void printReport(Connection connection, String title, String sql, Object... parameters) {
+        printReport(connection, System.out, title, sql, parameters);
+    }
 
-        System.out.println();
-        System.out.println(title);
+    /**
+     * Runs the sql and prints the results to the given stream as comma separated lines.
+     *
+     * @return true if the report ran, false if the database reported an error
+     */
+    static boolean printReport(Connection connection, PrintStream out,
+                               String title, String sql, Object... parameters) {
+
+        out.println();
+        out.println(title);
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
 
@@ -171,37 +244,48 @@ public class Report_base {
 
             try (ResultSet results = statement.executeQuery()) {
 
-                int columns = results.getMetaData().getColumnCount();
+                ResultSetMetaData metadata = results.getMetaData();
+                int columns = metadata.getColumnCount();
 
-                // column names
-                String header = "";
-                for (int i = 1; i <= columns; i++) {
-                    if (i > 1) header += ", ";
-                    header += results.getMetaData().getColumnLabel(i);
-                }
-                System.out.println(header);
+                out.println(formatHeader(metadata));
 
                 boolean found = false;
 
                 // one line per row
                 while (results.next()) {
                     found = true;
-                    String line = "";
-                    for (int i = 1; i <= columns; i++) {
-                        if (i > 1) line += ", ";
-                        line += results.getString(i);
-                    }
-                    System.out.println(line);
+                    out.println(formatRow(results, columns));
                 }
 
                 if (!found) {
-                    System.out.println("No results found.");
+                    out.println("No results found.");
                 }
             }
+            return true;
 
         } catch (SQLException e) {
-            System.out.println("Could not generate report: " + e.getMessage());
+            out.println("Could not generate report: " + e.getMessage());
+            return false;
         }
+    }
+
+    // the column names joined with ", "
+    static String formatHeader(ResultSetMetaData metadata) throws SQLException {
+        StringJoiner header = new StringJoiner(", ");
+        for (int i = 1; i <= metadata.getColumnCount(); i++) {
+            header.add(metadata.getColumnLabel(i));
+        }
+        return header.toString();
+    }
+
+    // the current row's values joined with ", " (a missing value shows as NULL)
+    static String formatRow(ResultSet results, int columns) throws SQLException {
+        StringJoiner line = new StringJoiner(", ");
+        for (int i = 1; i <= columns; i++) {
+            String value = results.getString(i);
+            line.add(value == null ? "NULL" : value);
+        }
+        return line.toString();
     }
 
     // asks for N and makes sure it's a positive number (used by the tests)
@@ -242,22 +326,25 @@ public class Report_base {
         return -1;
     }
 
+    static String buildUrl(String location) {
+        return "jdbc:mysql://" + location + "/world?useSSL=false&allowPublicKeyRetrieval=true";
+    }
+
     static Connection connect(String location, int delay)
             throws SQLException, InterruptedException {
 
-        String url = "jdbc:mysql://" + location + "/world?useSSL=false&allowPublicKeyRetrieval=true";
-
         // keep trying because mysql takes a while to start
-        for (int attempt = 1; attempt <= 30; attempt++) {
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
             try {
                 Thread.sleep(delay);
-                Connection connection = DriverManager.getConnection(url, "root", "example");
+                Connection connection =
+                        DriverManager.getConnection(buildUrl(location), DB_USER, DB_PASSWORD);
                 System.out.println("Connected to MySQL.");
                 return connection;
 
             } catch (SQLException e) {
                 System.out.println("Connection attempt " + attempt + " failed.");
-                if (attempt == 30) {
+                if (attempt == MAX_ATTEMPTS) {
                     throw e;
                 }
             }
