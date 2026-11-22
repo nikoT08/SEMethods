@@ -254,8 +254,13 @@ class IntegrationTest {
                         .add(results.getBigDecimal("NotInCitiesPercent"));
 
                 assertEquals(0, population.compareTo(inCities.add(notInCities)), results.getString("Name"));
-                assertTrue(percentages.subtract(new BigDecimal(100)).abs().doubleValue() <= 0.02,
-                        "percentages add up to " + percentages);
+                if (population.signum() > 0) {
+                    // (a continent with nobody in it, like Antarctica, has 0% and 0%)
+                    assertTrue(percentages.subtract(new BigDecimal(100)).abs().doubleValue() <= 0.02,
+                            "percentages add up to " + percentages);
+                } else {
+                    assertEquals(0, percentages.signum());
+                }
                 if (previous != null) {
                     assertTrue(previous.compareTo(population) >= 0, "largest population first");
                 }

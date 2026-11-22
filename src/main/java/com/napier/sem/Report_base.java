@@ -204,14 +204,16 @@ public class Report_base {
 
     // works out people living in cities and not in cities
     // adds up the cities for each country first so nothing gets counted twice
+    // IFNULL stops places with no people (e.g. Antarctica) giving a NULL percentage
     static String populationSql(String groupColumn) {
         return "SELECT " + groupColumn + " AS Name, " +
                 "SUM(country.Population) AS Population, " +
                 "SUM(IFNULL(c.CityPop, 0)) AS InCities, " +
-                "ROUND(SUM(IFNULL(c.CityPop, 0)) / SUM(country.Population) * 100, 2) AS InCitiesPercent, " +
+                "IFNULL(ROUND(SUM(IFNULL(c.CityPop, 0)) / SUM(country.Population) * 100, 2), 0) " +
+                "AS InCitiesPercent, " +
                 "SUM(country.Population) - SUM(IFNULL(c.CityPop, 0)) AS NotInCities, " +
-                "ROUND((SUM(country.Population) - SUM(IFNULL(c.CityPop, 0))) " +
-                "/ SUM(country.Population) * 100, 2) AS NotInCitiesPercent " +
+                "IFNULL(ROUND((SUM(country.Population) - SUM(IFNULL(c.CityPop, 0))) " +
+                "/ SUM(country.Population) * 100, 2), 0) AS NotInCitiesPercent " +
                 "FROM country " +
                 "LEFT JOIN (SELECT CountryCode, SUM(Population) AS CityPop " +
                 "FROM city GROUP BY CountryCode) c ON c.CountryCode = country.Code " +
