@@ -248,7 +248,7 @@ public class Report_base {
         String url = "jdbc:mysql://" + location + "/world?useSSL=false&allowPublicKeyRetrieval=true";
 
         // keep trying because mysql takes a while to start
-        for (int attempt = 1; attempt <= 10; attempt++) {
+        for (int attempt = 1; attempt <= 30; attempt++) {
             try {
                 Thread.sleep(delay);
                 Connection connection = DriverManager.getConnection(url, "root", "example");
@@ -257,7 +257,7 @@ public class Report_base {
 
             } catch (SQLException e) {
                 System.out.println("Connection attempt " + attempt + " failed.");
-                if (attempt == 10) {
+                if (attempt == 30) {
                     throw e;
                 }
             }
