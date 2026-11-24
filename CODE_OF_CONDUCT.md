@@ -14,4 +14,4 @@ CODE OF CONDUCT
 - If someoene dosent make a meeting or is 15 mins late they owe everyone a coffee.
 - Team members should provide feedback objectively and focus on processes, outcomes, and solutions rather than individuals.
 ## Deadlines
-- All deadlines should be made with time.
+- All deadlines should be made with time and any member who doesn't meet these deadlines will be in serious trouble
