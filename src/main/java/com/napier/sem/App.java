@@ -5,5 +5,7 @@ package com.napier.sem;
 public class App {
     public static void main(String[] args) {
         System.out.println("Yay");
+        System.out.println("Population Reporting System");
+        System.out.println("Welcome to the application!");
     }
 }
